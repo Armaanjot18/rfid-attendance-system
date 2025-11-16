@@ -970,7 +970,7 @@
             return Array.from(checkboxes).map(checkbox => parseInt(checkbox.value));
         }
 
-        function assignWork() {
+        async function assignWork() {
             const teamSelect = document.getElementById('selectTeam');
             const workTitle = document.getElementById('workTitle');
             const workDescription = document.getElementById('workDescription');
@@ -986,38 +986,76 @@
             const title = workTitle.value;
             const desc = workDescription.value || 'No description provided';
 
-            // Load opt-out map and existing assignments store
-            const optOutMap = JSON.parse(localStorage.getItem('clubWorkOptOut') || '{}');
-            const assignmentsStore = JSON.parse(localStorage.getItem('clubAssignments') || '{}');
+            const API_URL = 'http://localhost:3000/api';
+            const token = localStorage.getItem('token');
 
             let assignedCount = 0;
             let skippedCount = 0;
 
-            // Assign work to all selected students
-            selectedStudentIds.forEach(studentId => {
+            // Map student IDs to actual student roll numbers (STU-XXXX format)
+            const studentRollMap = {
+                1: 'STU-7743', // Prabdeep Singh
+                2: 'STU-0002', // Priya Singh
+                3: 'STU-0003', // Neha Gupta
+                4: 'STU-8814', // Armaanjot Singh
+                5: 'STU-0005', // Vikram Sharma
+                6: 'STU-0006', // Rohan Singh
+                7: 'STU-7655', // Rajveer Singh
+                8: 'STU-0008'  // Aditya Verma
+            };
+
+            // Assign work to all selected students via API
+            for (const studentId of selectedStudentIds) {
                 const student = team.students.find(s => s.id === studentId);
-                if (!student) return;
-                const studentKey = (student.name || '').toLowerCase();
-                if (optOutMap[studentKey]) { skippedCount++; return; }
+                if (!student) continue;
 
-                const newWork = {
-                    id: `work-${Date.now()}-${studentId}`,
-                    title,
-                    description: desc,
-                    status: 'pending',
-                    team: team.name,
-                    assignedAt: new Date().toISOString()
-                };
-                // Update in-memory view
-                student.work.push({ id: newWork.id, title: newWork.title, description: newWork.description });
-                // Persist for student view
-                const existing = Array.isArray(assignmentsStore[studentKey]) ? assignmentsStore[studentKey] : [];
-                assignmentsStore[studentKey] = [...existing, newWork];
-                assignedCount++;
-            });
+                const studentRoll = studentRollMap[studentId];
+                if (!studentRoll) {
+                    console.warn(`No roll number mapping for student ID ${studentId}`);
+                    skippedCount++;
+                    continue;
+                }
 
-            // Save updated assignments store
-            localStorage.setItem('clubAssignments', JSON.stringify(assignmentsStore));
+                try {
+                    const response = await fetch(`${API_URL}/clubs/duties`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            club_id: 1, // Cosmic Club ID
+                            student_id: studentRoll,
+                            duty_title: title,
+                            duty_description: desc,
+                            priority: 'medium',
+                            due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] // 1 week from now
+                        })
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        // Update in-memory view
+                        const newWork = {
+                            id: result.data?.id || `work-${Date.now()}-${studentId}`,
+                            title,
+                            description: desc,
+                            status: 'pending',
+                            team: team.name,
+                            assignedAt: new Date().toISOString()
+                        };
+                        student.work.push({ id: newWork.id, title: newWork.title, description: newWork.description });
+                        assignedCount++;
+                    } else {
+                        console.error(`Failed to assign to ${student.name}:`, result.message);
+                        skippedCount++;
+                    }
+                } catch (error) {
+                    console.error(`Error assigning to ${student.name}:`, error);
+                    skippedCount++;
+                }
+            }
 
             // Clear form
             workTitle.value = '';
@@ -1026,7 +1064,7 @@
             document.getElementById('studentCheckboxes').innerHTML = '<p class="helper-text">Select a team first to see students</p>';
 
             if (assignedCount > 0 || skippedCount > 0) {
-                const msg = `✓ Assigned to ${assignedCount} student${assignedCount!==1?'s':''}` + (skippedCount>0?` (skipped ${skippedCount} opted-out)`:'' );
+                const msg = `✓ Assigned to ${assignedCount} student${assignedCount!==1?'s':''}` + (skippedCount>0?` (${skippedCount} failed)`:'' );
                 alert(msg);
             }
             renderTeams();
@@ -1169,10 +1207,68 @@
             }
         }
 
+        // Load existing duties from database
+        async function loadExistingDuties() {
+            const API_URL = 'http://localhost:3000/api';
+            const token = localStorage.getItem('token');
+
+            if (!token) return;
+
+            // Student roll to local ID mapping
+            const rollToLocalId = {
+                'STU-7743': 1, // Prabdeep Singh
+                'STU-0002': 2, // Priya Singh
+                'STU-0003': 3, // Neha Gupta
+                'STU-8814': 4, // Armaanjot Singh
+                'STU-0005': 5, // Vikram Sharma
+                'STU-0006': 6, // Rohan Singh
+                'STU-7655': 7, // Rajveer Singh
+                'STU-0008': 8  // Aditya Verma
+            };
+
+            // Load duties for each student
+            for (const [rollNumber, localId] of Object.entries(rollToLocalId)) {
+                try {
+                    const response = await fetch(`${API_URL}/clubs/student/${rollNumber}/duties`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.success && Array.isArray(result.data)) {
+                        // Find the student in our teams
+                        for (const team of clubPortal.teams) {
+                            const student = team.students.find(s => s.id === localId);
+                            if (student) {
+                                student.work = result.data.map(duty => ({
+                                    id: duty.id,
+                                    title: duty.duty_title,
+                                    description: duty.duty_description,
+                                    status: duty.status,
+                                    team: duty.club_name || team.name,
+                                    assignedAt: duty.assigned_date
+                                }));
+                                break;
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error(`Error loading duties for ${rollNumber}:`, error);
+                }
+            }
+            
+            // Re-render teams with loaded data
+            renderTeams();
+        }
+
         // Initial render for admin/teacher view
         renderTeams();
         // Role-based UI
         initPortalForRole();
+        // Load existing duties from database
+        loadExistingDuties();
     </script>
 </body>
 </html>
