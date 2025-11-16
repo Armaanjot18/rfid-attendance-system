@@ -1,0 +1,118 @@
+╔════════════════════════════════════════════════════════════════════╗
+║          ARDUINO UNO + MFRC522 RFID - WIRING DIAGRAM              ║
+║                    (USB Wired Connection)                          ║
+╚════════════════════════════════════════════════════════════════════╝
+
+   ┌─────────────────────────────────────────┐
+   │         MFRC522 RFID Reader             │
+   │  ┌──────────────────────────────────┐   │
+   │  │  [Antenna]                       │   │
+   │  │  Place card here                 │   │
+   │  └──────────────────────────────────┘   │
+   │                                          │
+   │  Pin Layout:                             │
+   │  ┌───┬───┬───┬───┬───┬───┬───┬───┐     │
+   │  │SDA│SCK│MOS│MIS│IRQ│GND│RST│3.3│     │
+   │  │   │   │I  │O  │   │   │   │V  │     │
+   │  └─┬─┴─┬─┴─┬─┴─┬─┴───┴─┬─┴─┬─┴─┬─┘     │
+   └────┼───┼───┼───┼───────┼───┼───┼───────┘
+        │   │   │   │       │   │   │
+        │   │   │   │       │   │   │
+   ┌────┼───┼───┼───┼───────┼───┼───┼───────┐
+   │    ▼   ▼   ▼   ▼       ▼   ▼   ▼       │
+   │   10  13  11  12     GND  9  3.3V      │
+   │                                          │
+   │        ┌──────────────────┐             │
+   │        │ [ARDUINO UNO]    │             │
+   │        │                  │             │
+   │        │   ┌────────┐     │             │
+   │        │   │ ATMEGA │     │             │
+   │        │   │  328P  │     │             │
+   │        │   └────────┘     │             │
+   │        │                  │             │
+   │        │  Digital  Analog │             │
+   │ GND ○  │  0-13     A0-A5  │   ○ 3.3V   │
+   │ RST ●  └──────────────────┘   ○ 5V     │
+   │ MISO ●                         ○ GND    │
+   │ MOSI ●                         ● SCK    │
+   │ SS/SDA ●                       ○ VIN    │
+   │                                          │
+   │              [USB Port]                  │
+   │                  │                       │
+   └──────────────────┼───────────────────────┘
+                      │
+                      ▼
+              ┌──────────────┐
+              │  USB Cable   │
+              └──────┬───────┘
+                     │
+                     ▼
+              ┌──────────────┐
+              │   Your PC    │
+              │   (COM3/4/5) │
+              └──────────────┘
+
+
+╔═══════════════════════════════════════════════════════════════════╗
+║                      CONNECTION TABLE                             ║
+╠═══════════════════════════════════════════════════════════════════╣
+║  MFRC522 Pin  │  Wire Color  │  Arduino Uno Pin                  ║
+╠═══════════════╪══════════════╪═══════════════════════════════════╣
+║  SDA (SS)     │  Blue        │  Digital 10                       ║
+║  SCK          │  Orange      │  Digital 13                       ║
+║  MOSI         │  Yellow      │  Digital 11                       ║
+║  MISO         │  Green       │  Digital 12                       ║
+║  IRQ          │  (not used)  │  Not connected                    ║
+║  GND          │  Black       │  GND                              ║
+║  RST          │  White       │  Digital 9                        ║
+║  3.3V         │  Red         │  3.3V                             ║
+╚═══════════════╧══════════════╧═══════════════════════════════════╝
+
+OPTIONAL: BUZZER for audio feedback
+┌─────────────┐
+│   Buzzer    │
+│   ┌───┐     │
+│   │ + │─────┼─── Digital Pin 8
+│   └───┘     │
+│   │ - │─────┼─── GND
+│   └───┘     │
+└─────────────┘
+
+╔═══════════════════════════════════════════════════════════════════╗
+║                    IMPORTANT NOTES                                ║
+╠═══════════════════════════════════════════════════════════════════╣
+║  ⚠️  MFRC522 operates at 3.3V - connect to 3.3V pin NOT 5V!     ║
+║  ⚠️  Make sure all connections are secure                        ║
+║  ⚠️  Double-check wiring before powering on                      ║
+║  ✅  Use a breadboard for easier connections                     ║
+║  ✅  Color-code your wires for easier troubleshooting            ║
+║  ✅  Leave IRQ pin unconnected (not needed)                      ║
+╚═══════════════════════════════════════════════════════════════════╝
+
+SYSTEM OVERVIEW:
+┌──────────────────────────────────────────────────────────────────┐
+│                                                                   │
+│  RFID Card → MFRC522 → Arduino Uno → USB → PC                   │
+│                                              │                    │
+│                                              ▼                    │
+│                                       Serial Bridge               │
+│                                       (Node.js)                   │
+│                                              │                    │
+│                                              ▼                    │
+│                                       Backend Server              │
+│                                              │                    │
+│                                              ▼                    │
+│                                       students.xlsx               │
+│                                              │                    │
+│                                              ▼                    │
+│                                       Teacher Portal              │
+│                                                                   │
+└──────────────────────────────────────────────────────────────────┘
+
+Next Steps:
+1. Wire according to diagram above
+2. Upload arduino_rfid_code.ino
+3. Find COM port (Tools → Port in Arduino IDE)
+4. Update serial-bridge.js with COM port
+5. Run: start-rfid-system.bat
+6. Scan RFID card and watch the magic! ✨

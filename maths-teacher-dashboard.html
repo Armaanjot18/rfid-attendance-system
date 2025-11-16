@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematics Teacher Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #0D1117;
+            --card-color: #161B22;
+            --border-color: #30363D;
+            --text-primary: #C9D1D9;
+            --text-secondary: #8B949E;
+            --accent-color: #A371F7;
+            --accent-hover: #B892F8;
+            --green: #3FB950;
+            --red: #F85149;
+            --orange: #F78166;
+        }
+
+        .badge-subject {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-left: 0.75rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+        
+        .back-link {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+        .back-link:hover {
+            color: var(--accent-hover);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .summary-card {
+            background-color: #0c2d57;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .summary-card .label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+        }
+
+        .summary-card .value {
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2.5rem;
+            align-items: flex-start;
+        }
+
+        .charts-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+        }
+
+        .data-panel, .chart-panel {
+            background-color: var(--card-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.75rem;
+        }
+
+        .chart-panel canvas {
+            display: block;
+            margin: 0 auto;
+        }
+
+        .bar-panel canvas {
+            height: 200px !important;
+        }
+
+        .pie-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .pie-panel canvas {
+            width: 220px !important;
+            height: 220px !important;
+        }
+
+        .panel-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+
+        .panel-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 15px;
+		}
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th, .data-table td {
+            padding: 1rem 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.95rem;
+        }
+
+        .data-table th {
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .section-row {
+            cursor: pointer;
+            background-color: var(--card-color);
+            transition: background-color 0.2s;
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+
+        .section-row:hover {
+            background-color: #1c2128;
+        }
+
+        .section-row td {
+            padding: 1.25rem 0.75rem;
+        }
+
+        .student-row {
+            display: none;
+            background-color: #0d1117;
+        }
+
+        .student-row.visible {
+            display: table-row;
+        }
+
+        .section-toggle {
+            display: inline-block;
+            margin-right: 0.5rem;
+            transition: transform 0.2s;
+        }
+
+        .section-toggle.expanded {
+            transform: rotate(90deg);
+        }
+        
+        .status-active { color: var(--green); font-weight: 500; }
+        .status-inactive { color: var(--text-secondary); }
+
+        .attendance-bar {
+            width: 100%;
+            background-color: #2d333b;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .attendance-bar-inner {
+            height: 8px;
+            border-radius: 4px;
+        }
+
+        .risk-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--orange);
+            margin-left: 8px;
+            cursor: help;
+        }
+
+        .manual-entry-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 0.75rem;
+            background-color: #0D1117;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .submit-btn {
+            padding: 0.875rem;
+            background-color: var(--accent-color);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            height: fit-content;
+        }
+
+        .export-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s ease;
+        }
+
+        .export-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .leave-request-card {
+            background-color: #0d1117;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .leave-request-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .leave-request-student {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .leave-request-type {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .leave-type-medical {
+            background-color: rgba(63, 185, 80, 0.2);
+            color: var(--green);
+        }
+
+        .leave-type-duty {
+            background-color: rgba(79, 127, 241, 0.2);
+            color: var(--accent-color);
+        }
+
+        .leave-request-dates {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .leave-request-reason {
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+            padding: 0.5rem;
+            background-color: #1c2128;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .leave-request-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .leave-action-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .leave-action-btn.approve {
+            background-color: rgba(63, 185, 80, 0.2);
+            color: var(--green);
+        }
+
+        .leave-action-btn.approve:hover {
+            background-color: rgba(63, 185, 80, 0.3);
+        }
+
+        .leave-action-btn.reject {
+            background-color: rgba(248, 81, 73, 0.2);
+            color: var(--red);
+        }
+
+        .leave-action-btn.reject:hover {
+            background-color: rgba(248, 81, 73, 0.3);
+        }
+
+        .leave-action-btn.download {
+            background-color: rgba(79, 127, 241, 0.2);
+            color: var(--accent-color);
+        }
+
+        .leave-action-btn.download:hover {
+            background-color: rgba(79, 127, 241, 0.3);
+        }
+
+        .footer {
+            margin-top: 3rem;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 992px) {
+            .manual-entry-form {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 768px) {
+            body { padding: 1rem; }
+            .header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+            .header h1 { font-size: 1.8rem; }
+            .summary-grid { grid-template-columns: 1fr 1fr; }
+            .panel-title { font-size: 1.2rem; }
+        }
+        @media (max-width: 480px) {
+            .summary-grid { grid-template-columns: 1fr; }
+            .panel-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+        }
+    </style>
+    <style>
+        :root {
+            --bg-color: #0d0f12;
+            --gradient-1: #2d150c;
+            --gradient-2: #6d441f;
+            --gradient-3: #3a1c10;
+            --gradient-4: #1e2540;
+            --gradient-5: #0b3a3f;
+            --gradient-6: #3d1f39;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-hover: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --glass-border-hover: rgba(255, 255, 255, 0.35);
+            --text-primary: #e9e9e9;
+            --text-secondary: #b7b7b7;
+            --accent-color: #e3c29c;
+            --accent-hover: #f4d9b3;
+            --accent-gradient: linear-gradient(135deg,#ff7d5e 5%,#e3c29c 45%,#6ec6ff 75%,#c792ea 100%);
+            --shadow-color: rgba(227, 194, 156, 0.25);
+            --glow-color: rgba(198,146,234,0.45);
+            --radius-lg: 16px;
+            --transition: 0.45s cubic-bezier(.4,.2,.2,1);
+            --card-color: rgba(255,255,255,0.04);
+            --border-color: var(--glass-border);
+            --green: #3FB950;
+            --red: #F85149;
+            --orange: #F78166;
+        }
+        :root.theme-light {
+            --bg-color: #f6f7fb;
+            --gradient-1: #ffffff;
+            --gradient-2: #f4f6ff;
+            --gradient-3: #eef2ff;
+            --gradient-4: #e6f3ff;
+            --gradient-5: #eaf9f5;
+            --gradient-6: #f7ecff;
+            --glass-bg: rgba(255, 255, 255, 0.65);
+            --glass-hover: rgba(255, 255, 255, 0.8);
+            --glass-border: rgba(0, 0, 0, 0.08);
+            --glass-border-hover: rgba(0, 0, 0, 0.18);
+            --text-primary: #0f141a;
+            --text-secondary: #3d4650;
+            --accent-color: #7b5cff;
+            --accent-hover: #5c8dff;
+            --accent-gradient: linear-gradient(135deg,#ff9a7a 5%,#ffc864 40%,#5cc9ff 75%,#9c7cff 100%);
+            --shadow-color: rgba(17, 24, 39, 0.08);
+            --glow-color: rgba(92, 201, 255, 0.35);
+        }
+        @media (prefers-color-scheme: light) { :root:not(.theme-dark):not(.theme-light) { color-scheme: light; } }
+        @media (prefers-color-scheme: dark) { :root:not(.theme-dark):not(.theme-light) { color-scheme: dark; } }
+        body {
+            background:
+                radial-gradient(circle at 18% 22%, var(--gradient-4) 0%, transparent 48%),
+                radial-gradient(circle at 78% 74%, var(--gradient-5) 0%, transparent 60%),
+                radial-gradient(circle at 85% 18%, var(--gradient-6) 0%, transparent 55%),
+                linear-gradient(115deg, var(--gradient-3), var(--bg-color));
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2.5rem;
+        }
+        :root.theme-light body { background:
+            radial-gradient(circle at 18% 22%, var(--gradient-4) 0%, transparent 48%),
+            radial-gradient(circle at 78% 74%, var(--gradient-5) 0%, transparent 60%),
+            radial-gradient(circle at 85% 18%, var(--gradient-6) 0%, transparent 55%),
+            linear-gradient(115deg, var(--bg-color), #ffffff); }
+        /* Theme toggle */
+        .theme-toggle { position: fixed; top: 16px; right: 16px; display: inline-flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 999px; border: 1px solid var(--glass-border); background: var(--glass-bg); color: var(--text-primary); cursor: pointer; backdrop-filter: blur(10px) saturate(140%); -webkit-backdrop-filter: blur(10px) saturate(140%); box-shadow: 0 8px 24px -10px var(--shadow-color); transition: var(--transition); user-select: none; z-index: 1000; }
+        .theme-toggle:hover { border-color: var(--glass-border-hover); transform: translateY(-1px); }
+        .theme-toggle svg { width: 18px; height: 18px; }
+        .icon-sun { display: none; }
+        .icon-moon { display: inline; }
+        :root.theme-light .icon-sun { display: inline; }
+        :root.theme-light .icon-moon { display: none; }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,1px,1px); white-space: nowrap; border: 0; }
+    </style>
+    <style>
+        /* Glass component refinements */
+        .summary-card { background: var(--glass-bg) !important; border: 1px solid var(--glass-border) !important; border-radius: 12px; box-shadow: 0 12px 30px -15px var(--shadow-color); backdrop-filter: blur(10px) saturate(140%); -webkit-backdrop-filter: blur(10px) saturate(140%); }
+        .summary-card:hover { background: var(--glass-hover) !important; border-color: var(--glass-border-hover) !important; }
+        .summary-card .label { color: var(--text-secondary) !important; }
+        .summary-card .value { color: var(--text-primary) !important; }
+        .data-panel, .chart-panel { background: var(--glass-bg); border: 1px solid var(--glass-border); box-shadow: 0 12px 30px -15px var(--shadow-color); backdrop-filter: blur(10px) saturate(140%); -webkit-backdrop-filter: blur(10px) saturate(140%); }
+        .section-row { background: var(--glass-bg); }
+        .section-row:hover { background: var(--glass-hover); }
+        .leave-request-card { background: var(--glass-bg); border: 1px solid var(--glass-border); }
+        .leave-request-reason { background-color: transparent; }
+        .form-group input, .form-group select { background-color: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); }
+        .submit-btn { background: var(--accent-color); }
+        .back-link { color: var(--accent-color); }
+        .back-link:hover { color: var(--accent-hover); }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+        </svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+        <span class="sr-only">Theme</span>
+    </button>
+    <div class="container">
+        <header class="header">
+            <div>
+                <h1>Mathematics Teacher Dashboard <span class="badge-subject" style="background: rgba(163, 113, 247, 0.18); color: #A371F7;">Mathematics</span></h1>
+                <p id="welcome-message">Welcome. Full access granted.</p>
+            </div>
+            <a href="#" class="back-link" onclick="logout()">Logout &rarr;</a>
+        </header>
+
+        <section class="summary-grid">
+            <div class="summary-card" style="background-color: #EFEFEF;">
+                <div class="label" style="color: #555;">Total Students</div>
+                <div id="total-students" class="value" style="color: #0D1117;">10</div>
+            </div>
+            <div class="summary-card" style="background-color: #043d19;">
+                <div class="label">Avg. Attendance</div>
+                <div id="avg-attendance" class="value" style="color: #FFFFFF;">81%</div>
+            </div>
+            <div class="summary-card" style="background-color: #5c1a1a;">
+                <div class="label">AI-Identified Risks</div>
+                <div id="low-attendance-alerts" class="value" style="color: #FFFFFF;">0</div>
+            </div>
+        </section>
+
+        <main class="main-content">
+            <div class="charts-container">
+                <div class="chart-panel bar-panel">
+                    <h2 class="panel-title">Class Attendance Overview</h2>
+                    <canvas id="attendanceChart"></canvas>
+                </div>
+                <div class="chart-panel pie-panel">
+                    <h2 class="panel-title">Student Department Distribution</h2>
+                    <canvas id="departmentPieChart" width="220" height="220"></canvas>
+                </div>
+                
+                <!-- Leave Requests Panel -->
+                <div class="chart-panel" id="leave-requests-panel">
+                    <h2 class="panel-title">Pending Leave Requests</h2>
+                    <div id="leave-requests-container" style="max-height: 400px; overflow-y: auto;">
+                        <p style="color: var(--text-secondary); text-align: center;">Loading leave requests...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="data-panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">Student Activity Log</h2>
+                    <div>
+                        <button id="export-csv-btn" class="export-btn">Export to CSV</button>
+                        <button id="export-pdf-btn" class="export-btn">Export to PDF</button>
+                    </div>
+                </div>
+                <table class="data-table" id="student-table">
+                    <thead>
+                        <tr>
+                            <th>Section/Student</th>
+                            <th>Student ID</th>
+                            <th>Department</th>
+                            <th>Last Access</th>
+                            <th>Attendance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <!-- Sections will be dynamically generated -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="data-panel">
+                <h2 class="panel-title">Manual Entry & Leave Management</h2>
+                <form id="manual-entry-form" class="manual-entry-form">
+                    <div class="form-group">
+                        <label for="student-select">Select Student(s)</label>
+                        <select id="student-select" name="student-select" required multiple size="5">
+                            <!-- Options populated by JS -->
+                        </select>
+                        <small style="color: var(--text-secondary); margin-top: 0.25rem;">Use Ctrl/Cmd to select multiple students.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="entry-type">Entry Type</label>
+                        <select id="entry-type" name="entry-type">
+                            <option value="manual_attendance">Manual Attendance</option>
+                            <option value="duty_leave">Duty Leave</option>
+                            <option value="medical_leave">Medical Leave</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="entry-date">Date</label>
+                        <input type="date" id="entry-date" name="entry-date" required>
+                    </div>
+                    <div class="form-group" id="attendance-status-group">
+                        <label for="attendance-status">Status</label>
+                        <select id="attendance-status" name="attendance-status">
+                            <option value="present">Present</option>
+                            <option value="absent">Absent</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="submit-btn">Submit Entry</button>
+                </form>
+            </div>
+
+            <div class="data-panel">
+                <h2 class="panel-title">AI-Powered Insights & Predictions</h2>
+                <ul id="ai-insights-list" style="padding-left: 20px; color: var(--text-secondary); line-height: 1.6;">
+                    <!-- AI insights will be populated here -->
+                </ul>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 Mathematics Teacher Dashboard. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        let studentsData = [];
+        let autoRefreshInterval = null;
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        }
+
+        // Auto-refresh function to poll Excel data
+        async function refreshStudentData() {
+            const token = localStorage.getItem('token');
+            
+            console.log('🔄 Attempting to refresh data...', new Date().toLocaleTimeString());
+            
+            try {
+                // Fetch only students from this teacher's department
+                // Map full department name to the stored MySQL value (students table stores full names per seed)
+                // Fetch all students since Mathematics is taught across all departments
+                const response = await fetch(`${API_URL}/students`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const result = await response.json();
+                
+                console.log('📊 Received data from backend:', result.count, 'students');
+                
+                if (result.success) {
+                    // Check if data actually changed
+                    const dataChanged = JSON.stringify(studentsData) !== JSON.stringify(result.data);
+                    
+                    if (dataChanged) {
+                        console.log('✅ Data changed! Updating dashboard...');
+                        studentsData = result.data;
+                        
+                        // Re-initialize dashboard with new data
+                        const { atRiskStudents, insights } = predictAtRiskStudents(studentsData);
+                        window.atRiskStudents = atRiskStudents;
+                        window.insights = insights;
+                        
+                        renderTable();
+                        updateAIPanel();
+                        updateCharts();
+                        
+                        console.log('✨ Dashboard updated successfully!', new Date().toLocaleTimeString());
+                    } else {
+                        console.log('ℹ️ No changes detected in data');
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Error refreshing data:', error);
+            }
+        }
+
+        // Start auto-refresh every 5 seconds
+        function startAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+            }
+            autoRefreshInterval = setInterval(refreshStudentData, 5000); // Refresh every 5 seconds
+            console.log('Auto-refresh enabled: Checking Excel every 5 seconds');
+        }
+
+        // Stop auto-refresh
+        function stopAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+                console.log('Auto-refresh disabled');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check if user is logged in
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            
+            // Update welcome message
+            if (user.name) {
+                document.getElementById('welcome-message').textContent = `Welcome, ${user.name} - Mathematics Teacher. Full access granted.`;
+            }
+
+            if (!token || user.role !== 'teacher') {
+                alert('Please login as a teacher to access this page');
+                window.location.href = 'maths-teacher-login.html';
+                return;
+            }
+
+            // Fetch student data from backend
+            try {
+                const response = await fetch(`${API_URL}/students`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const result = await response.json();
+                
+                function isMultiDept(dept) {
+                    return dept && dept.toLowerCase().includes('applied science');
+                }
+
+                if (result.success) {
+                    let deptStudents = result.data || [];
+                    // Fallback: if teacher handles multi-department foundational subjects OR no matches, load all
+                    if (deptStudents.length === 0 || isMultiDept(user.department)) {
+                        try {
+                            const allResp = await fetch(`${API_URL}/students`, {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            const allData = await allResp.json();
+                            if (allData.success && Array.isArray(allData.data)) {
+                                // If we had some dept students (rare case) keep them; else use all
+                                if (deptStudents.length === 0 || isMultiDept(user.department)) {
+                                    deptStudents = allData.data;
+                                }
+                            }
+                        } catch(e) {
+                            console.warn('Fallback to all students failed:', e);
+                        }
+                    }
+                    studentsData = deptStudents;
+                    initializeDashboard();
+                } else {
+                    console.error('Failed to fetch students:', result.message);
+                    // Fallback to default data
+                    studentsData = [
+                        { name: 'Alex Ray', id: 'STU-8814', department: 'MX', access: 'Lab 3B', attendance: 95, prevAttendance: 92, totalClasses: 20, attendedClasses: 19 },
+                        { name: 'David Chen', id: 'STU-7743', department: 'MX', access: 'Lab 1A', attendance: 62, prevAttendance: 75, totalClasses: 20, attendedClasses: 12 },
+                        { name: 'Omar Abdullah', id: 'STU-7655', department: 'MX', access: 'Lab 1A', attendance: 89, prevAttendance: 88, totalClasses: 20, attendedClasses: 18 },
+                        { name: 'Jian Li', id: 'STU-7201', department: 'ITA', access: 'Lab 1A', attendance: 88, prevAttendance: 90, totalClasses: 20, attendedClasses: 18 },
+                        { name: 'Chloe Williams', id: 'STU-8231', department: 'ITA', access: 'Cafeteria', attendance: 98, prevAttendance: 99, totalClasses: 20, attendedClasses: 20 },
+                        { name: 'Maria Garcia', id: 'STU-9156', department: 'CSEA', access: 'Lab 3B', attendance: 91, prevAttendance: 93, totalClasses: 20, attendedClasses: 18 },
+                        { name: 'Ben Carter', id: 'STU-4339', department: 'CSEA', access: 'Gymnasium', attendance: 55, prevAttendance: 60, totalClasses: 20, attendedClasses: 11 },
+                        { name: 'Kenji Tanaka', id: 'STU-6532', department: 'CE', access: 'Lab 2C', attendance: 78, prevAttendance: 85, totalClasses: 20, attendedClasses: 16 },
+                        { name: 'Sofia Rossi', id: 'STU-9902', department: 'CE', access: 'Lab 2C', attendance: 72, prevAttendance: 73, totalClasses: 20, attendedClasses: 14 },
+                        { name: 'Fatima Al-Fassi', id: 'STU-5098', department: 'ECA', access: 'Library', attendance: 85, prevAttendance: 86, totalClasses: 20, attendedClasses: 17 }
+                    ];
+                    initializeDashboard();
+                }
+            } catch (error) {
+                console.error('Error fetching students:', error);
+                alert('Could not connect to server. Using offline data.');
+                // Fallback to default data
+                studentsData = [
+                    { name: 'Alex Ray', id: 'STU-8814', department: 'MX', access: 'Lab 3B', attendance: 95, prevAttendance: 92, totalClasses: 20, attendedClasses: 19 },
+                    { name: 'David Chen', id: 'STU-7743', department: 'MX', access: 'Lab 1A', attendance: 62, prevAttendance: 75, totalClasses: 20, attendedClasses: 12 },
+                    { name: 'Omar Abdullah', id: 'STU-7655', department: 'MX', access: 'Lab 1A', attendance: 89, prevAttendance: 88, totalClasses: 20, attendedClasses: 18 },
+                    { name: 'Jian Li', id: 'STU-7201', department: 'ITA', access: 'Lab 1A', attendance: 88, prevAttendance: 90, totalClasses: 20, attendedClasses: 18 },
+                    { name: 'Chloe Williams', id: 'STU-8231', department: 'ITA', access: 'Cafeteria', attendance: 98, prevAttendance: 99, totalClasses: 20, attendedClasses: 20 },
+                    { name: 'Maria Garcia', id: 'STU-9156', department: 'CSEA', access: 'Lab 3B', attendance: 91, prevAttendance: 93, totalClasses: 20, attendedClasses: 18 },
+                    { name: 'Ben Carter', id: 'STU-4339', department: 'CSEA', access: 'Gymnasium', attendance: 55, prevAttendance: 60, totalClasses: 20, attendedClasses: 11 },
+                    { name: 'Kenji Tanaka', id: 'STU-6532', department: 'CE', access: 'Lab 2C', attendance: 78, prevAttendance: 85, totalClasses: 20, attendedClasses: 16 },
+                    { name: 'Sofia Rossi', id: 'STU-9902', department: 'CE', access: 'Lab 2C', attendance: 72, prevAttendance: 73, totalClasses: 20, attendedClasses: 14 },
+                    { name: 'Fatima Al-Fassi', id: 'STU-5098', department: 'ECA', access: 'Library', attendance: 85, prevAttendance: 86, totalClasses: 20, attendedClasses: 17 }
+                ];
+                initializeDashboard();
+            }
+            
+            // Start auto-refresh after initial load
+            startAutoRefresh();
+            
+            // Fetch leave requests
+            fetchLeaveRequests();
+            
+            // Auto-refresh leave requests every 10 seconds
+            setInterval(fetchLeaveRequests, 10000);
+        });
+
+        function initializeDashboard() {
+            // --- AI/ML Simulation: At-Risk Student Prediction ---
+            window.predictAtRiskStudents = function(students) {
+                const atRiskStudents = [];
+                const insights = [];
+
+                students.forEach(student => {
+                    let riskScore = 0;
+                    let reasons = [];
+
+                    // Rule 1: Critically low attendance
+                    if (student.attendance < 65) {
+                        riskScore += 50;
+                        reasons.push('Critically low attendance');
+                    }
+                    
+                    // Rule 2: Significant drop in attendance
+                    const attendanceDrop = student.prevAttendance - student.attendance;
+                    if (attendanceDrop > 10) {
+                        riskScore += 40;
+                        reasons.push(`Significant drop in attendance (${attendanceDrop}%)`);
+                    }
+
+                    if (riskScore >= 50) {
+                        atRiskStudents.push({ ...student, riskScore, reasons });
+                    }
+                });
+                
+                const sortedRisks = atRiskStudents.sort((a, b) => b.riskScore - a.riskScore);
+                
+                // Generate insights text
+                if (sortedRisks.length > 0) {
+                    insights.push(`The model identified ${sortedRisks.length} student(s) at risk.`);
+                    sortedRisks.forEach(s => {
+                        insights.push(`- **${s.name}** is flagged due to: ${s.reasons.join(', ')}.`);
+                    });
+                } else {
+                    insights.push('The model currently identifies no students at significant risk.');
+                }
+
+                return { atRiskStudents: sortedRisks, insights };
+            }
+
+            let { atRiskStudents, insights } = predictAtRiskStudents(studentsData);
+
+            function updateAIPanel() {
+                const insightsList = document.getElementById('ai-insights-list');
+                insightsList.innerHTML = '';
+                insights.forEach(insight => {
+                    const li = document.createElement('li');
+                    li.innerHTML = insight;
+                    insightsList.appendChild(li);
+                });
+            }
+            
+            updateAIPanel();
+
+            // --- Group students by department ---
+            const departmentGroups = {};
+            studentsData.forEach(student => {
+                if (!departmentGroups[student.department]) {
+                    departmentGroups[student.department] = [];
+                }
+                departmentGroups[student.department].push(student);
+            });
+
+            // --- Build Table ---
+            const tableBody = document.getElementById('table-body');
+            
+            function renderTable() {
+                tableBody.innerHTML = ''; // Clear table before rendering
+                Object.keys(departmentGroups).sort().forEach(dept => {
+                    const students = departmentGroups[dept];
+                    const studentCount = students.length;
+                    const avgAttendance = Math.round(students.reduce((sum, s) => sum + s.attendance, 0) / studentCount);
+                    
+                    // Create section row
+                    const sectionRow = document.createElement('tr');
+                    sectionRow.className = 'section-row';
+                    sectionRow.dataset.department = dept;
+                    sectionRow.innerHTML = `
+                        <td><span class="section-toggle">▶</span> ${dept} Section</td>
+                        <td colspan="2">${studentCount} Students</td>
+                        <td>-</td>
+                        <td>${avgAttendance}% Avg</td>
+                    `;
+                    tableBody.appendChild(sectionRow);
+
+                    // Create student rows
+                    students.forEach(student => {
+                        const studentRow = document.createElement('tr');
+                        studentRow.className = 'student-row';
+                        studentRow.dataset.department = dept;
+                        
+                        const isAtRisk = atRiskStudents.find(s => s.id === student.id);
+                        let riskIndicator = '';
+                        if (isAtRisk) {
+                            riskIndicator = `<span class="risk-indicator" title="AI Risk Alert: ${isAtRisk.reasons.join(', ')}"></span>`;
+                        }
+
+                        const attendance = student.attendance;
+                        let barColor;
+                        
+                        if (attendance >= 85) {
+                            barColor = 'rgba(88, 166, 255, 1)';
+                        } else if (attendance >= 60) {
+                            barColor = 'rgba(247, 129, 102, 1)';
+                        } else {
+                            barColor = 'rgba(248, 81, 73, 1)';
+                        }
+                        
+                        studentRow.innerHTML = `
+                            <td style="padding-left: 2.5rem;">${student.name} ${riskIndicator}</td>
+                            <td>${student.id}</td>
+                            <td>${student.department}</td>
+                            <td>${student.access}</td>
+                            <td>${attendance}% <div class="attendance-bar"><div class="attendance-bar-inner" style="width: ${attendance}%; background-color: ${barColor};"></div></div></td>
+                        `;
+                        tableBody.appendChild(studentRow);
+                    });
+
+                    // Add click handler for section toggle
+                    sectionRow.addEventListener('click', function(e) {
+                        if (e.target.classList.contains('action-btn')) return;
+                        const dept = this.dataset.department;
+                        const studentRows = document.querySelectorAll(`.student-row[data-department="${dept}"]`);
+                        const toggle = this.querySelector('.section-toggle');
+                        
+                        studentRows.forEach(row => {
+                            row.classList.toggle('visible');
+                        });
+                        
+                        toggle.classList.toggle('expanded');
+                    });
+                });
+            }
+            
+            renderTable();
+
+            // --- Manual Entry Form Logic ---
+            const studentSelect = document.getElementById('student-select');
+            studentsData.sort((a, b) => a.name.localeCompare(b.name)).forEach(student => {
+                const option = document.createElement('option');
+                option.value = student.id;
+                option.textContent = `${student.name} (${student.id})`;
+                studentSelect.appendChild(option);
+            });
+
+            const manualEntryForm = document.getElementById('manual-entry-form');
+            const entryTypeSelect = document.getElementById('entry-type');
+            const attendanceStatusGroup = document.getElementById('attendance-status-group');
+
+            entryTypeSelect.addEventListener('change', function() {
+                attendanceStatusGroup.style.display = this.value === 'manual_attendance' ? 'block' : 'none';
+            });
+
+            manualEntryForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const selectedOptions = Array.from(studentSelect.selectedOptions);
+                const studentIds = selectedOptions.map(option => option.value);
+                const entryType = entryTypeSelect.value;
+                const dateString = document.getElementById('entry-date').value;
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                const teacherSubject = user.subject || 'Science'; // Default to Science if not specified
+
+                if (studentIds.length === 0 || !dateString) {
+                    alert('Please select at least one student and a date.');
+                    return;
+                }
+
+                // --- Date Validation ---
+                const selectedDate = new Date(dateString);
+                const today = new Date();
+                const oneYearAgo = new Date();
+                oneYearAgo.setFullYear(today.getFullYear() - 1);
+
+                // Reset time part for accurate date comparison
+                today.setHours(0, 0, 0, 0);
+                oneYearAgo.setHours(0, 0, 0, 0);
+                
+                if (selectedDate > today) {
+                    alert('Error: The selected date cannot be in the future.');
+                    return;
+                }
+                if (selectedDate < oneYearAgo) {
+                    alert('Error: The selected date cannot be more than one year in the past.');
+                    return;
+                }
+                // --- End Date Validation ---
+
+                let alertMessages = [];
+                const token = localStorage.getItem('token');
+
+                // Process each student
+                for (const studentId of studentIds) {
+                    const student = studentsData.find(s => s.id === studentId);
+                    if (!student) continue;
+
+                    let message = `Entry for ${student.name} on ${dateString}: `;
+                    let attendedClasses, totalClasses;
+
+                    // Get current subject-specific attendance
+                    if (teacherSubject.toLowerCase() === 'pps') {
+                        totalClasses = (student.ppsTotal || 0) + 1;
+                        attendedClasses = student.ppsAttended || 0;
+                    } else if (teacherSubject.toLowerCase() === 'mathematics') {
+                        totalClasses = (student.mathsTotal || 0) + 1;
+                        attendedClasses = student.mathsAttended || 0;
+                    } else if (teacherSubject.toLowerCase() === 'physics') {
+                        totalClasses = (student.physicsTotal || 0) + 1;
+                        attendedClasses = student.physicsAttended || 0;
+                    } else {
+                        // For general subjects, update overall attendance
+                        totalClasses = student.totalClasses + 1;
+                        attendedClasses = student.attendedClasses;
+                    }
+
+                    if (entryType === 'manual_attendance') {
+                        const status = document.getElementById('attendance-status').value;
+                        if (status === 'present') {
+                            attendedClasses += 1;
+                        }
+                        message += `Type: Manual Attendance (${teacherSubject}), Status: ${status.charAt(0).toUpperCase() + status.slice(1)}`;
+                    } else { // Duty or Medical Leave
+                        attendedClasses += 1; // Leaves are counted as attended
+                        const leaveType = entryType.replace('_', ' ');
+                        message += `Type: ${leaveType.charAt(0).toUpperCase() + leaveType.slice(1)} (${teacherSubject}), Status: Marked as Present`;
+                    }
+
+                    // Update subject-specific attendance via API
+                    try {
+                        const response = await fetch(`${API_URL}/students/${studentId}/subject-attendance`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify({
+                                subject: teacherSubject,
+                                attendedClasses: attendedClasses,
+                                totalClasses: totalClasses
+                            })
+                        });
+
+                        const result = await response.json();
+                        if (result.success) {
+                            alertMessages.push(message + ' ✓');
+                        } else {
+                            alertMessages.push(message + ' ✗ (Failed)');
+                        }
+                    } catch (error) {
+                        console.error('Error updating attendance:', error);
+                        alertMessages.push(message + ' ✗ (Error)');
+                    }
+                }
+                
+                // Refresh data from backend to get updated values
+                await refreshStudentData();
+                
+                alert(`Processed ${alertMessages.length} entries:\n\n` + alertMessages.join('\n'));
+                manualEntryForm.reset();
+                studentSelect.selectedIndex = -1; // Deselect all options
+                attendanceStatusGroup.style.display = 'block';
+            });
+
+            // --- Chart.js Logic ---
+            const studentNames = studentsData.map(s => s.name);
+            const attendanceData = studentsData.map(s => s.attendance);
+
+            const highColor = 'rgba(88, 166, 255, 0.6)';
+            const midColor = 'rgba(247, 129, 102, 0.6)';
+            const lowColor = 'rgba(248, 81, 73, 0.6)';
+
+            function getBarColors() {
+                return studentsData.map(student => {
+                    if (student.attendance >= 85) return highColor;
+                    if (student.attendance >= 60) return midColor;
+                    return lowColor;
+                });
+            }
+
+            const ctx = document.getElementById('attendanceChart').getContext('2d');
+            const attendanceChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: studentNames,
+                    datasets: [{
+                        label: 'Attendance %',
+                        data: attendanceData,
+                        backgroundColor: getBarColors(),
+                        borderColor: getBarColors().map(c => c.replace('0.6', '1')),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { color: 'var(--text-secondary)' },
+                            grid: { color: 'var(--border-color)' }
+                        },
+                        y: {
+                            ticks: { color: 'var(--text-primary)' },
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            // --- Pie Chart Logic ---
+            const departmentCounts = {};
+            studentsData.forEach(student => {
+                departmentCounts[student.department] = (departmentCounts[student.department] || 0) + 1;
+            });
+
+            const pieCtx = document.getElementById('departmentPieChart').getContext('2d');
+            const departmentPieChart = new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(departmentCounts),
+                    datasets: [{
+                        label: 'Students',
+                        data: Object.values(departmentCounts),
+                        backgroundColor: [
+                            'rgba(88, 166, 255, 0.7)',
+                            'rgba(46, 160, 67, 0.7)',
+                            'rgba(210, 87, 227, 0.7)',
+                            'rgba(247, 129, 102, 0.7)',
+                            'rgba(160, 132, 240, 0.7)'
+                        ],
+                        borderColor: [
+                            '#58A6FF',
+                            '#2EA043',
+                            '#D257E3',
+                            '#F78166',
+                            '#A084F0'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            align: 'center',
+                            labels: {
+                                color: 'var(--text-primary)',
+                                boxWidth: 12,
+                                padding: 16
+                            }
+                        }
+                    }
+                }
+            });
+
+            function updateCharts() {
+                attendanceChart.data.datasets[0].data = studentsData.map(s => s.attendance);
+                attendanceChart.data.datasets[0].backgroundColor = getBarColors();
+                attendanceChart.data.datasets[0].borderColor = getBarColors().map(c => c.replace('0.6', '1'));
+                attendanceChart.update();
+                
+                // Update summary cards
+                const totalStudents = studentsData.length;
+                const lowAttendanceAlerts = atRiskStudents.length;
+                const avgAttendance = Math.round(studentsData.reduce((acc, s) => acc + s.attendance, 0) / totalStudents);
+
+                document.getElementById('total-students').textContent = totalStudents;
+                document.getElementById('avg-attendance').textContent = `${avgAttendance}%`;
+                document.getElementById('low-attendance-alerts').textContent = lowAttendanceAlerts;
+            }
+
+            // --- Summary Card Logic ---
+            updateCharts(); // Initial call to populate summary cards
+
+            // --- Export Logic ---
+            document.getElementById('export-csv-btn').addEventListener('click', () => exportTableToCSV('maths-student-data.csv'));
+            document.getElementById('export-pdf-btn').addEventListener('click', () => exportTableToPDF());
+
+            function exportTableToCSV(filename) {
+                let csv = [];
+                const rows = document.querySelectorAll("#student-table tr");
+                
+                for (const row of rows) {
+                    const cols = row.querySelectorAll("td, th");
+                    const rowData = [];
+                    for (const col of cols) {
+                        // Clean up text and handle potential commas
+                        let data = col.innerText.replace(/(\s\s+|\n)/g, ' ').trim();
+                        data = `"${data}"`;
+                        rowData.push(data);
+                    }
+                    csv.push(rowData.join(","));
+                }
+
+                const csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
+                const downloadLink = document.createElement("a");
+                downloadLink.download = filename;
+                downloadLink.href = window.URL.createObjectURL(csvFile);
+                downloadLink.style.display = "none";
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+            }
+
+            function exportTableToPDF() {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                doc.autoTable({
+                    html: '#student-table',
+                    startY: 20,
+                    theme: 'grid',
+                    headStyles: { fillColor: [41, 128, 185] },
+                    styles: {
+                        cellPadding: 3,
+                        fontSize: 8,
+                        overflow: 'linebreak'
+                    },
+                    didParseCell: function (data) {
+                        // Remove the attendance bar from the PDF
+                        if (data.column.dataKey === 'Attendance') {
+                            if (data.cell.raw.querySelector('.attendance-bar')) {
+                                data.cell.text = data.cell.text[0].split(' ')[0];
+                            }
+                        }
+                    }
+                });
+
+                doc.text("Mathematics Student Activity Log", 14, 15);
+                doc.save('maths-student-data.pdf');
+            }
+        } // End of initializeDashboard function
+
+        // Fetch and display leave requests
+        async function fetchLeaveRequests() {
+            try {
+                const token = localStorage.getItem('token');
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                let teacherUsername = user.username;
+                // Map maths-teacher to maths-user
+                if (teacherUsername === 'maths-teacher') teacherUsername = 'maths-user';
+                const response = await fetch(`${API_URL}/attendance/leave-requests/teacher/${teacherUsername}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch leave requests');
+                }
+                
+                const result = await response.json();
+                displayLeaveRequests(result.data || []);
+            } catch (error) {
+                console.error('Error fetching leave requests:', error);
+                document.getElementById('leave-requests-container').innerHTML = 
+                    '<p style="color: var(--text-secondary); text-align: center;">Error loading leave requests</p>';
+            }
+        }
+
+        function displayLeaveRequests(requests) {
+            const container = document.getElementById('leave-requests-container');
+            
+            // We already hit a teacher-specific endpoint; only need to filter by pending status here
+            const pendingRequests = requests.filter(req => req.status === 'pending');
+            
+            if (pendingRequests.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">No pending leave requests for you</p>';
+                return;
+            }
+            
+            container.innerHTML = pendingRequests.map(request => `
+                <div class="leave-request-card">
+                    <div class="leave-request-header">
+                        <span class="leave-request-student">${request.studentName}</span>
+                        <span class="leave-request-type leave-type-${request.type}">
+                            ${request.type === 'duty' ? 'Duty Leave' : 'Medical Leave'}
+                        </span>
+                    </div>
+                    <div class="leave-request-dates">
+                        📅 ${formatDate(request.startDate)} - ${formatDate(request.endDate)}
+                    </div>
+                    <div class="leave-request-reason">
+                        <strong>Reason:</strong> ${request.reason}
+                    </div>
+                    ${request.sentTo ? `
+                        <div style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.5rem;">
+                            📨 Sent to: ${request.sentTo.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                        </div>
+                    ` : ''}
+                    <div class="leave-request-actions">
+                        ${request.documentData ? `
+                            <button class="leave-action-btn download" onclick="downloadDocument('${request.documentData}', '${request.documentName}')">
+                                📄 Download Document
+                            </button>
+                        ` : ''}
+                        <button class="leave-action-btn approve" onclick="updateLeaveStatus(${request.id}, 'approved')">
+                            ✓ Approve
+                        </button>
+                        <button class="leave-action-btn reject" onclick="updateLeaveStatus(${request.id}, 'rejected')">
+                            ✗ Reject
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        function downloadDocument(base64Data, filename) {
+            try {
+                // Create a link element
+                const link = document.createElement('a');
+                link.href = base64Data;
+                link.download = filename || 'leave-document.pdf';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } catch (error) {
+                console.error('Error downloading document:', error);
+                alert('Failed to download document');
+            }
+        }
+
+        async function updateLeaveStatus(requestId, status) {
+            try {
+                const token = localStorage.getItem('token');
+                const remarks = status === 'rejected' ? prompt('Please enter reason for rejection (optional):') : '';
+                
+                const response = await fetch(`${API_URL}/attendance/leave-requests/${requestId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ status, remarks: remarks || '' })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to update leave request');
+                }
+                
+                const result = await response.json();
+                alert(`Leave request ${status} successfully!`);
+                
+                // Refresh leave requests
+                fetchLeaveRequests();
+            } catch (error) {
+                console.error('Error updating leave status:', error);
+                alert('Failed to update leave request');
+            }
+        }
+    </script>
+    <script>
+        (function() {
+            const storageKey = 'acs-theme';
+            const root = document.documentElement;
+            function applyTheme(mode) {
+                if (mode === 'light') { root.classList.add('theme-light'); root.classList.remove('theme-dark'); }
+                else if (mode === 'dark') { root.classList.add('theme-dark'); root.classList.remove('theme-light'); }
+                else { root.classList.remove('theme-light'); root.classList.remove('theme-dark'); }
+            }
+            const saved = localStorage.getItem(storageKey);
+            if (saved === 'light' || saved === 'dark') applyTheme(saved); else {
+                const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+                applyTheme(prefersLight ? 'light' : 'dark');
+            }
+            const btn = document.getElementById('themeToggle');
+            btn && btn.addEventListener('click', function(){
+                const isLight = root.classList.contains('theme-light');
+                const next = isLight ? 'dark' : 'light';
+                applyTheme(next);
+                try { localStorage.setItem(storageKey, next); } catch(e){}
+            });
+        })();
+    </script>
+</body>
+</html>

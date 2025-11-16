@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Control</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d0f12;
+            --gradient-1: #2d150c; /* warm auburn */
+            --gradient-2: #6d441f; /* bronze */
+            --gradient-3: #3a1c10; /* deep chestnut */
+            --gradient-4: #1e2540; /* indigo navy */
+            --gradient-5: #0b3a3f; /* teal depth */
+            --gradient-6: #3d1f39; /* plum accent */
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-hover: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --glass-border-hover: rgba(255, 255, 255, 0.35);
+            --text-primary: #e9e9e9;
+            --text-secondary: #b7b7b7;
+            --accent-color: #e3c29c; /* gold sand */
+            --accent-hover: #f4d9b3; /* brighter gold */
+            --accent-gradient: linear-gradient(135deg,#ff7d5e 5%,#e3c29c 45%,#6ec6ff 75%,#c792ea 100%);
+            --shadow-color: rgba(227, 194, 156, 0.25);
+            --glow-color: rgba(198,146,234,0.45);
+            --radius-lg: 16px;
+            --transition: 0.45s cubic-bezier(.4,.2,.2,1);
+        }
+
+        /* Light theme overrides */
+        :root.theme-light {
+            --bg-color: #f6f7fb;
+            --gradient-1: #ffffff;
+            --gradient-2: #f4f6ff;
+            --gradient-3: #eef2ff;
+            --gradient-4: #e6f3ff; /* soft blue */
+            --gradient-5: #eaf9f5; /* mint */
+            --gradient-6: #f7ecff; /* lilac */
+            --glass-bg: rgba(255, 255, 255, 0.65);
+            --glass-hover: rgba(255, 255, 255, 0.8);
+            --glass-border: rgba(0, 0, 0, 0.08);
+            --glass-border-hover: rgba(0, 0, 0, 0.18);
+            --text-primary: #0f141a;
+            --text-secondary: #3d4650;
+            --accent-color: #7b5cff; /* violet accent */
+            --accent-hover: #5c8dff;
+            --accent-gradient: linear-gradient(135deg,#ff9a7a 5%,#ffc864 40%,#5cc9ff 75%,#9c7cff 100%);
+            --shadow-color: rgba(17, 24, 39, 0.08);
+            --glow-color: rgba(92, 201, 255, 0.35);
+        }
+
+        /* Respect system preference when no saved choice */
+        @media (prefers-color-scheme: light) {
+            :root:not(.theme-dark):not(.theme-light) {
+                color-scheme: light;
+            }
+        }
+        @media (prefers-color-scheme: dark) {
+            :root:not(.theme-dark):not(.theme-light) {
+                color-scheme: dark;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background:
+                radial-gradient(circle at 18% 22%, var(--gradient-4) 0%, transparent 48%),
+                radial-gradient(circle at 78% 74%, var(--gradient-5) 0%, transparent 60%),
+                radial-gradient(circle at 85% 18%, var(--gradient-6) 0%, transparent 55%),
+                linear-gradient(115deg, var(--gradient-3), var(--bg-color));
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 3.5rem 3rem 4rem;
+        }
+
+        /* Light theme background tuning */
+        :root.theme-light body {
+            background:
+                radial-gradient(circle at 18% 22%, var(--gradient-4) 0%, transparent 48%),
+                radial-gradient(circle at 78% 74%, var(--gradient-5) 0%, transparent 60%),
+                radial-gradient(circle at 85% 18%, var(--gradient-6) 0%, transparent 55%),
+                linear-gradient(115deg, var(--bg-color), #ffffff);
+        }
+
+        .container {
+            max-width: 1100px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 3.5rem;
+            text-align: left;
+        }
+
+        .header h1 {
+            font-size: 3.4rem;
+            font-weight: 600;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.85rem;
+            background: linear-gradient(90deg,#ffffff 0%,#ffdac7 25%,#ffd082 50%,#91dcff 75%,#d2b1ff 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            position: relative;
+        }
+
+        .header p {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0; /* align paragraph left with heading */
+        }
+
+        .departments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2.2rem;
+        }
+
+        .department-card {
+            background: linear-gradient(145deg, var(--glass-bg) 0%, rgba(255,255,255,0.03) 100%);
+            border: 1px solid transparent;
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+            border-radius: var(--radius-lg);
+            padding: 2.4rem 2rem 2.2rem;
+            text-align: left;
+            text-decoration: none;
+            color: var(--text-primary);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(14px) saturate(160%);
+            -webkit-backdrop-filter: blur(14px) saturate(160%);
+            box-shadow: 0 1px 0 rgba(255,255,255,0.08), 0 8px 32px -8px rgba(0,0,0,0.55);
+            transition: var(--transition);
+        }
+
+        .department-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(145deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 45%);
+            opacity: 0.35;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .department-card::after {
+            content: "";
+            position: absolute;
+            inset: -1px;
+            border-radius: inherit;
+            padding: 1px; /* for gradient border illusion */
+            background: var(--accent-gradient);
+            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask-composite: exclude;
+            -webkit-mask-composite: xor;
+            opacity: 0.55;
+            filter: blur(16px);
+            pointer-events: none;
+            transition: var(--transition);
+            z-index: 0;
+        }
+        .department-card:hover {
+            transform: translateY(-7px);
+            background: linear-gradient(155deg, var(--glass-hover) 0%, rgba(255,255,255,0.04) 100%);
+            box-shadow: 0 8px 40px -6px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08), 0 0 0 4px rgba(255,255,255,0.02);
+        }
+        .department-card:hover::after {
+            opacity: 0.85;
+            filter: blur(22px) brightness(1.15);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            flex-shrink: 0;
+            display: grid;
+            place-items: center;
+        }
+        .card-icon svg {
+            width: 32px;
+            height: 32px;
+            stroke: var(--accent-color);
+            stroke-width: 1.8;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: var(--transition);
+            filter: drop-shadow(0 0 4px rgba(227,194,156,0.35)) drop-shadow(0 0 12px rgba(145,220,255,0.15));
+        }
+        .department-card:hover .card-icon svg {
+            stroke: var(--accent-hover);
+            filter: drop-shadow(0 0 6px rgba(240,208,170,0.7)) drop-shadow(0 0 24px rgba(199,146,234,0.4));
+        }
+
+        .card-title {
+            font-size: 1.35rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .card-description {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .card-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            font-weight: 600;
+            background: var(--accent-gradient);
+            background-size: 180% 180%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-decoration: none;
+            transition: background-position 1.2s ease, opacity var(--transition);
+        }
+
+        .department-card:hover .card-link {
+            background-position: 100% 50%;
+            opacity: 0.95;
+        }
+
+        .card-link .arrow {
+            transition: transform 0.2s ease;
+        }
+
+        .department-card:hover .card-link .arrow {
+            transform: translateX(5px);
+        }
+
+        .footer {
+            margin-top: 5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1.5rem;
+                display: block; /* Change from flex for better mobile layout */
+            }
+            .header {
+                margin-bottom: 3rem;
+            }
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            .header p {
+                font-size: 1rem;
+            }
+            .departments-grid {
+                gap: 1rem;
+            }
+            .department-card {
+                padding: 1.7rem 1.4rem 1.5rem;
+            }
+        }
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            .departments-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Theme toggle button */
+        .theme-toggle {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            cursor: pointer;
+            backdrop-filter: blur(10px) saturate(140%);
+            -webkit-backdrop-filter: blur(10px) saturate(140%);
+            box-shadow: 0 8px 24px -10px var(--shadow-color);
+            transition: var(--transition);
+            user-select: none;
+        }
+        .theme-toggle:hover {
+            border-color: var(--glass-border-hover);
+            transform: translateY(-1px);
+        }
+        .theme-toggle svg { width: 18px; height: 18px; }
+        .icon-sun { display: none; }
+        .icon-moon { display: inline; }
+        :root.theme-light .icon-sun { display: inline; }
+        :root.theme-light .icon-moon { display: none; }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,1px,1px); white-space: nowrap; border: 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme">
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="4"></circle>
+                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+            </svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+            <span class="sr-only">Theme</span>
+        </button>
+        <header class="header">
+            <h1>Access Control System</h1>
+            <p>Select your departmental portal to manage access, monitor activity, and configure credentials.</p>
+        </header>
+
+        <main class="departments-grid">
+            <a href="applied-science-login.html" class="department-card">
+                <div class="card-header">
+                    <span class="card-icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M7 3h10"></path>
+                            <path d="M9 3v3.5a5.5 5.5 0 0 1-1.1 3.3L5.8 15a5 5 0 0 0 4.2 7h4a5 5 0 0 0 4.2-7l-2.1-5.2A5.5 5.5 0 0 1 15 6.5V3"></path>
+                        </svg>
+                    </span>
+                    <h2 class="card-title">Applied Science</h2>
+                </div>
+                <p class="card-description">Manage access to research facilities, specialized labs, and equipment storage.</p>
+                <div class="card-link">
+                    <span>Open Portal</span>
+                    <span class="arrow">→</span>
+                </div>
+            </a>
+
+            <a href="it-login.html" class="department-card">
+                <div class="card-header">
+                    <span class="card-icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <rect x="3" y="5" width="18" height="12" rx="2"></rect>
+                            <path d="M8 21h8"></path>
+                            <path d="M12 17v4"></path>
+                        </svg>
+                    </span>
+                    <h2 class="card-title">IT Department</h2>
+                </div>
+                <p class="card-description">Administer permissions for data centers, server rooms, and network closets.</p>
+                <div class="card-link">
+                    <span>Open Portal</span>
+                    <span class="arrow">→</span>
+                </div>
+            </a>
+
+            <a href="ece-login.html" class="department-card">
+                <div class="card-header">
+                    <span class="card-icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"></path>
+                        </svg>
+                    </span>
+                    <h2 class="card-title">ECE Department</h2>
+                </div>
+                <p class="card-description">Control entry to electronics labs, testing chambers, and high-voltage areas.</p>
+                <div class="card-link">
+                    <span>Open Portal</span>
+                    <span class="arrow">→</span>
+                </div>
+            </a>
+
+            <a href="cse-login.html" class="department-card">
+                <div class="card-header">
+                    <span class="card-icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M8 9l-5 3 5 3"></path>
+                            <path d="M16 9l5 3-5 3"></path>
+                            <path d="M11 17 13 7"></path>
+                        </svg>
+                    </span>
+                    <h2 class="card-title">CSE Department</h2>
+                </div>
+                <p class="card-description">Access development servers, manage project repositories, and enter coding labs.</p>
+                <div class="card-link">
+                    <span>Open Portal</span>
+                    <span class="arrow">→</span>
+                </div>
+            </a>
+
+            <a href="electrical-login.html" class="department-card">
+                <div class="card-header">
+                    <span class="card-icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M9 18h6"></path>
+                            <path d="M10 22h4"></path>
+                            <path d="M12 2a7 7 0 0 0-4.29 12.42c.44.37.74.89.82 1.46l.12 1.12h6.7l.12-1.12c.08-.57.38-1.09.82-1.46A7 7 0 0 0 12 2Z"></path>
+                        </svg>
+                    </span>
+                    <h2 class="card-title">Electrical</h2>
+                </div>
+                <p class="card-description">Manage access to power systems labs, circuit design rooms, and control centers.</p>
+                <div class="card-link">
+                    <span>Open Portal</span>
+                    <span class="arrow">→</span>
+                </div>
+            </a>
+
+            <a href="civil-login.html" class="department-card">
+                <div class="card-header">
+                    <span class="card-icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M3 21h18"></path>
+                            <path d="M8 21V7l4-4 4 4v14"></path>
+                            <path d="M8 10h8"></path>
+                            <path d="M8 14h8"></path>
+                        </svg>
+                    </span>
+                    <h2 class="card-title">Civil</h2>
+                </div>
+                <p class="card-description">Oversee access to structural engineering labs, materials testing facilities, and survey sites.</p>
+                <div class="card-link">
+                    <span>Open Portal</span>
+                    <span class="arrow">→</span>
+                </div>
+            </a>
+
+            <a href="mechanical-login.html" class="department-card">
+                <div class="card-header">
+                    <span class="card-icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"></path>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09c0 .7.4 1.33 1 1.51a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06c-.46.46-.61 1.12-.33 1.82V9c.7 0 1.33.4 1.51 1H21a2 2 0 0 1 0 4h-.09c-.7 0-1.33.4-1.51 1z"></path>
+                        </svg>
+                    </span>
+                    <h2 class="card-title">Mechanical</h2>
+                </div>
+                <p class="card-description">Control entry to machine shops, thermodynamics labs, and automotive workshops.</p>
+                <div class="card-link">
+                    <span>Open Portal</span>
+                    <span class="arrow">→</span>
+                </div>
+            </a>
+
+            <a href="club-member-login.html" class="department-card">
+                <div class="card-header">
+                    <span class="card-icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                    </span>
+                    <h2 class="card-title">Clubs</h2>
+                </div>
+                <p class="card-description">Access student clubs, societies, and extracurricular activity spaces.</p>
+                <div class="card-link">
+                    <span>Open Portal</span>
+                    <span class="arrow">→</span>
+                </div>
+            </a>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 University Access Systems. All rights reserved.</p>
+        </footer>
+    </div>
+        <script>
+                (function() {
+                    const storageKey = 'acs-theme';
+                    const root = document.documentElement;
+                    function applyTheme(mode) {
+                        if (mode === 'light') {
+                            root.classList.add('theme-light');
+                            root.classList.remove('theme-dark');
+                        } else if (mode === 'dark') {
+                            root.classList.add('theme-dark');
+                            root.classList.remove('theme-light');
+                        } else {
+                            root.classList.remove('theme-light');
+                            root.classList.remove('theme-dark');
+                        }
+                    }
+                    // Initial
+                    const saved = localStorage.getItem(storageKey);
+                    if (saved === 'light' || saved === 'dark') {
+                        applyTheme(saved);
+                    } else {
+                        const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+                        applyTheme(prefersLight ? 'light' : 'dark');
+                    }
+                    // Toggle
+                    const btn = document.getElementById('themeToggle');
+                    btn.addEventListener('click', function() {
+                        const isLight = root.classList.contains('theme-light');
+                        const next = isLight ? 'dark' : 'light';
+                        applyTheme(next);
+                        try { localStorage.setItem(storageKey, next); } catch (e) {}
+                    });
+                    // React to system changes when user hasn't chosen
+                    const mq = window.matchMedia('(prefers-color-scheme: light)');
+                    mq.addEventListener && mq.addEventListener('change', (e) => {
+                        const savedNow = localStorage.getItem(storageKey);
+                        if (!savedNow) applyTheme(e.matches ? 'light' : 'dark');
+                    });
+                })();
+        </script>
+</body>
+</html>

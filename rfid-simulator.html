@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RFID Simulator - Test ESP32/Arduino Integration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #0d1117;
+            color: #c9d1d9;
+        }
+        h1 { color: #58a6ff; }
+        .card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .rfid-input {
+            width: 100%;
+            padding: 12px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #c9d1d9;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        button {
+            background: #238636;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover { background: #2ea043; }
+        .simulate-btn { background: #1f6feb; }
+        .simulate-btn:hover { background: #388bfd; }
+        .success { color: #3fb950; }
+        .error { color: #f85149; }
+        .info { color: #58a6ff; }
+        pre {
+            background: #0d1117;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            border: 1px solid #30363d;
+        }
+        .device-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .device-info input {
+            padding: 8px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            color: #c9d1d9;
+        }
+        .rfid-card {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            min-width: 200px;
+        }
+        .rfid-card:hover {
+            transform: translateY(-5px);
+        }
+        .rfid-card h3 {
+            margin: 0;
+            color: white;
+        }
+        .rfid-card p {
+            margin: 5px 0;
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔖 RFID Attendance Simulator</h1>
+    <p class="info">Simulate ESP32/Arduino RFID card scanning to test backend integration</p>
+
+    <div class="card">
+        <h2>Quick Scan - Predefined Students</h2>
+        <p>Click a card to simulate RFID scan:</p>
+        <div>
+            <div class="rfid-card" onclick="scanCard('A1B2C3D4', 'Armaanjot Singh', 'STU-8814')">
+                <h3>Armaanjot Singh</h3>
+                <p>ID: STU-8814</p>
+                <p>RFID: A1B2C3D4</p>
+            </div>
+            <div class="rfid-card" onclick="scanCard('E5F6G7H8', 'Prabhdeep Singh', 'STU-7743')">
+                <h3>Prabhdeep Singh</h3>
+                <p>ID: STU-7743</p>
+                <p>RFID: E5F6G7H8</p>
+            </div>
+            <div class="rfid-card" onclick="scanCard('I9J0K1L2', 'Rajveer Singh', 'STU-7655')">
+                <h3>Rajveer Singh</h3>
+                <p>ID: STU-7655</p>
+                <p>RFID: I9J0K1L2</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Custom RFID Scan</h2>
+        <label>RFID Tag:</label>
+        <input type="text" id="rfidTag" class="rfid-input" placeholder="Enter RFID tag (e.g., A1B2C3D4)" value="A1B2C3D4">
+        
+        <label>Device Settings:</label>
+        <div class="device-info">
+            <input type="text" id="deviceId" placeholder="Device ID" value="ESP32_GATE_01">
+            <input type="text" id="location" placeholder="Location" value="Main Gate">
+            <input type="text" id="serverUrl" placeholder="Server URL" value="http://localhost:3000">
+        </div>
+        
+        <button onclick="scanRFID()">📡 Scan RFID Card</button>
+        <button class="simulate-btn" onclick="generateRandomTag()">🎲 Random Tag</button>
+    </div>
+
+    <div class="card">
+        <h2>RFID Mapping Setup</h2>
+        <p>To map RFID tags to students, add them to your Excel file:</p>
+        <ol>
+            <li>Open <code>students.xlsx</code></li>
+            <li>Add a column named "RFID Tag"</li>
+            <li>Enter RFID tags for each student (e.g., A1B2C3D4)</li>
+            <li>Save the file</li>
+            <li>Restart the backend server</li>
+        </ol>
+        <button onclick="downloadExcelTemplate()">📥 Download Excel Template</button>
+    </div>
+
+    <div class="card">
+        <h2>Response</h2>
+        <div id="response"><pre>Waiting for RFID scan...</pre></div>
+    </div>
+
+    <div class="card">
+        <h2>ESP32 Arduino Code</h2>
+        <button onclick="copyCode()">📋 Copy ESP32 Code</button>
+        <pre id="arduinoCode">// Update these values in ESP32 code:
+const char* ssid = "YOUR_WIFI_SSID";
+const char* password = "YOUR_WIFI_PASSWORD";
+const char* serverUrl = "http://YOUR_PC_IP:3000/api/attendance/rfid";
+
+// Your PC's IP Address:
+// Open CMD → type "ipconfig" → look for IPv4 Address
+// Example: http://192.168.1.100:3000/api/attendance/rfid</pre>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+
+        async function scanRFID() {
+            const rfidTag = document.getElementById('rfidTag').value.toUpperCase();
+            const deviceId = document.getElementById('deviceId').value;
+            const location = document.getElementById('location').value;
+            const serverUrl = document.getElementById('serverUrl').value;
+            
+            if (!rfidTag) {
+                alert('Please enter an RFID tag');
+                return;
+            }
+            
+            const responseDiv = document.getElementById('response');
+            responseDiv.innerHTML = '<pre>Scanning RFID tag: ' + rfidTag + '...</pre>';
+            
+            try {
+                const response = await fetch(`${serverUrl}/api/attendance/rfid`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        rfidTag: rfidTag,
+                        deviceId: deviceId,
+                        location: location
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    responseDiv.innerHTML = `
+                        <pre class="success">✓ ATTENDANCE MARKED SUCCESSFULLY!
+                        
+Student: ${result.data.studentName}
+ID: ${result.data.studentId}
+Department: ${result.data.department}
+Location: ${result.data.location}
+Device: ${result.data.deviceId}
+Time: ${result.data.time}
+
+Full Response:
+${JSON.stringify(result, null, 2)}</pre>
+                    `;
+                    
+                    // Show notification
+                    showNotification('✓ ' + result.data.studentName, 'Attendance marked successfully');
+                } else {
+                    responseDiv.innerHTML = `
+                        <pre class="error">✗ ERROR
+                        
+${result.message}
+
+Possible reasons:
+- RFID tag not mapped to any student
+- Server not running
+- Wrong API endpoint
+
+Add RFID tag to students.xlsx file:
+1. Open students.xlsx
+2. Add "RFID Tag" column if not exists
+3. Enter "${rfidTag}" for the student
+4. Save and restart server
+
+Full Response:
+${JSON.stringify(result, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                responseDiv.innerHTML = `
+                    <pre class="error">✗ CONNECTION ERROR
+                    
+${error.message}
+
+Troubleshooting:
+1. Make sure backend server is running
+2. Run: cd rfid_backend && node server.js
+3. Check if http://localhost:3000 is accessible
+4. Check firewall settings</pre>
+                `;
+            }
+        }
+
+        function scanCard(rfidTag, studentName, studentId) {
+            document.getElementById('rfidTag').value = rfidTag;
+            scanRFID();
+        }
+
+        function generateRandomTag() {
+            const chars = '0123456789ABCDEF';
+            let tag = '';
+            for (let i = 0; i < 8; i++) {
+                tag += chars[Math.floor(Math.random() * chars.length)];
+            }
+            document.getElementById('rfidTag').value = tag;
+        }
+
+        function showNotification(title, message) {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification(title, { body: message });
+            }
+        }
+
+        function copyCode() {
+            const code = document.getElementById('arduinoCode').textContent;
+            navigator.clipboard.writeText(code);
+            alert('Code copied to clipboard!');
+        }
+
+        function downloadExcelTemplate() {
+            alert('Open students.xlsx in the project root folder and add "RFID Tag" column');
+        }
+
+        // Request notification permission
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+
+        // Show network info
+        window.onload = async () => {
+            try {
+                const response = await fetch('http://localhost:3000/');
+                const data = await response.json();
+                console.log('✓ Server is running:', data);
+            } catch (error) {
+                console.error('✗ Server not reachable:', error);
+                document.getElementById('response').innerHTML = 
+                    '<pre class="error">⚠️ Server not running! Start with: cd rfid_backend && node server.js</pre>';
+            }
+        };
+    </script>
+</body>
+</html>

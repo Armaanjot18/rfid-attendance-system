@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club Portal - Member Work Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d0f12;
+            --gradient-1: #2d150c;
+            --gradient-2: #6d441f;
+            --gradient-3: #3a1c10;
+            --gradient-4: #1e2540;
+            --gradient-5: #0b3a3f;
+            --gradient-6: #3d1f39;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-hover: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --glass-border-hover: rgba(255, 255, 255, 0.35);
+            --text-primary: #e9e9e9;
+            --text-secondary: #b7b7b7;
+            --accent-color: #e3c29c;
+            --accent-hover: #f4d9b3;
+            --accent-gradient: linear-gradient(135deg,#ff7d5e 5%,#e3c29c 45%,#6ec6ff 75%,#c792ea 100%);
+            --shadow-color: rgba(227, 194, 156, 0.25);
+            --glow-color: rgba(198,146,234,0.45);
+            --radius-lg: 16px;
+            --transition: 0.45s cubic-bezier(.4,.2,.2,1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background:
+                radial-gradient(circle at 18% 22%, var(--gradient-4) 0%, transparent 48%),
+                radial-gradient(circle at 78% 74%, var(--gradient-5) 0%, transparent 60%),
+                radial-gradient(circle at 85% 18%, var(--gradient-6) 0%, transparent 55%),
+                linear-gradient(115deg, var(--gradient-3), var(--bg-color));
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(90deg,#ffffff 0%,#ffdac7 25%,#ffd082 50%,#91dcff 75%,#d2b1ff 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .club-info {
+            background: linear-gradient(145deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 100%);
+            border: 1px solid rgba(227, 194, 156, 0.2);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 3rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .club-info h2 {
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .club-info p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .members-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .club-section {
+            margin-bottom: 3rem;
+        }
+
+        .club-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 100%);
+            border: 1px solid rgba(227, 194, 156, 0.2);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+            transition: all var(--transition);
+        }
+
+        .club-card:hover {
+            background: linear-gradient(145deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            border-color: rgba(227, 194, 156, 0.4);
+            box-shadow: 0 15px 40px rgba(227, 194, 156, 0.15);
+        }
+
+        .club-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .club-icon {
+            font-size: 2.5rem;
+        }
+
+        .club-title {
+            flex: 1;
+        }
+
+        .club-title h2 {
+            font-size: 1.5rem;
+            color: var(--accent-color);
+            margin-bottom: 0.3rem;
+        }
+
+        .club-count {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .toggle-arrow {
+            font-size: 1.5rem;
+            color: var(--accent-color);
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-arrow.open {
+            transform: rotate(180deg);
+        }
+
+        .students-list {
+            display: none;
+            margin-top: 1.5rem;
+        }
+
+        .students-list.open {
+            display: block;
+        }
+
+        .student-item {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(227, 194, 156, 0.1);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .student-header {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .student-header:hover {
+            background: rgba(0, 0, 0, 0.4);
+            border-left: 3px solid var(--accent-color);
+            padding-left: calc(1rem - 3px);
+        }
+
+        .student-avatar-small {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e3c29c 0%, #f5e6d3 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1a1f2e;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .student-info-small h4 {
+            color: #ffffff;
+            font-size: 1rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .student-info-small p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .expand-icon {
+            margin-left: auto;
+            font-size: 1.2rem;
+            color: var(--accent-color);
+            transition: transform 0.3s ease;
+        }
+
+        .expand-icon.open {
+            transform: rotate(180deg);
+        }
+
+        .student-work {
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .student-work.open {
+            display: block;
+        }
+
+        .assigned-work-item {
+            background: rgba(227, 194, 156, 0.05);
+            border-left: 3px solid var(--accent-color);
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            border-radius: 4px;
+        }
+
+        .assigned-work-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .work-title-simple {
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 0.4rem;
+            font-size: 0.95rem;
+        }
+
+        .work-description-simple {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(227, 194, 156, 0.3);
+        }
+
+        .assignment-section {
+            background: linear-gradient(145deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 100%);
+            border: 1px solid rgba(227, 194, 156, 0.2);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 3rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .assignment-form {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            color: var(--accent-color);
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(227, 194, 156, 0.2);
+            border-radius: 8px;
+            padding: 0.9rem;
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            resize: vertical;
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: rgba(227, 194, 156, 0.4);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            background: rgba(0, 0, 0, 0.5);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(227, 194, 156, 0.1);
+        }
+
+        .form-group select option {
+            background: #1a1f2e;
+            color: #ffffff;
+        }
+
+        .helper-text {
+            font-size: 0.8rem;
+            color: rgba(227, 194, 156, 0.6);
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+
+        #selectStudents {
+            min-height: 120px;
+        }
+
+        #selectStudents option:checked {
+            background: linear-gradient(#4ade80, #4ade80);
+            background-color: #4ade80 !important;
+            color: #1a1f2e !important;
+        }
+
+        .checkbox-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(227, 194, 156, 0.1);
+            border-radius: 8px;
+            min-height: 100px;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .checkbox-input {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--accent-color);
+            border-radius: 4px;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .checkbox-input:hover {
+            background: rgba(227, 194, 156, 0.1);
+            border-color: #f5e6d3;
+        }
+
+        .checkbox-input:checked {
+            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+            border-color: #4ade80;
+            box-shadow: 0 0 8px rgba(74, 222, 128, 0.4);
+        }
+
+        .checkbox-input:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .checkbox-label {
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            cursor: pointer;
+            user-select: none;
+            transition: color 0.3s ease;
+        }
+
+        .checkbox-wrapper:hover .checkbox-label {
+            color: var(--accent-color);
+        }
+
+        /* Slider Styles */
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: linear-gradient(to right, rgba(227, 194, 156, 0.3), rgba(227, 194, 156, 0.5));
+            outline: none;
+            -webkit-appearance: none;
+            margin: 1rem 0;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e3c29c 0%, #f5e6d3 100%);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(227, 194, 156, 0.5);
+            border: 2px solid var(--accent-color);
+            transition: all 0.3s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 15px rgba(227, 194, 156, 0.7);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e3c29c 0%, #f5e6d3 100%);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(227, 194, 156, 0.5);
+            border: 2px solid var(--accent-color);
+            transition: all 0.3s ease;
+        }
+
+        input[type="range"]::-moz-range-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 15px rgba(227, 194, 156, 0.7);
+        }
+
+        input[type="range"]::-moz-range-track {
+            background: transparent;
+            border: none;
+        }
+
+        .btn-assign {
+            background: linear-gradient(135deg, #d4860e 0%, #e3c29c 100%);
+            color: #1a1f2e;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            align-self: flex-start;
+        }
+
+        .btn-assign:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(212, 134, 14, 0.3);
+        }
+
+        .team-section {
+            margin-bottom: 3rem;
+        }
+
+        .team-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .team-icon {
+            font-size: 2rem;
+        }
+
+        .member-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 100%);
+            border: 1px solid rgba(227, 194, 156, 0.2);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            transition: all var(--transition);
+            backdrop-filter: blur(10px);
+        }
+
+        .member-card:hover {
+            background: linear-gradient(145deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            border-color: rgba(227, 194, 156, 0.4);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(227, 194, 156, 0.15);
+        }
+
+        .member-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+        }
+
+        .member-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e3c29c 0%, #f5e6d3 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: #1a1f2e;
+            font-weight: 700;
+        }
+
+        .member-info h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.3rem;
+            color: #ffffff;
+        }
+
+        .member-info p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .work-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .work-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--accent-color);
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            display: block;
+        }
+
+        .work-item {
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 3px solid var(--accent-color);
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .work-item.pending {
+            border-left-color: #ff9a56;
+        }
+
+        .work-item.completed {
+            border-left-color: #4ade80;
+        }
+
+        .work-item.rejected {
+            border-left-color: #ff6b6b;
+        }
+
+        .work-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .work-description {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.8rem;
+            line-height: 1.5;
+        }
+
+        .work-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: rgba(255, 154, 86, 0.2);
+            color: #ff9a56;
+        }
+
+        .status-completed {
+            background: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+        }
+
+        .status-rejected {
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+        }
+
+        .status-approved {
+            background: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+        }
+
+        .teacher-actions {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(227, 194, 156, 0.1);
+        }
+
+        .btn-approve, .btn-reject {
+            flex: 1;
+            padding: 0.7rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .btn-approve {
+            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+            color: #ffffff;
+        }
+
+        .btn-approve:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(74, 222, 128, 0.3);
+        }
+
+        .btn-reject {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%);
+            color: #ffffff;
+        }
+
+        .btn-reject:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .btn-approve:disabled, .btn-reject:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 3rem;
+            border-top: 1px solid rgba(227, 194, 156, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header p {
+                font-size: 0.95rem;
+            }
+
+            .members-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .club-info {
+                padding: 1.5rem;
+            }
+
+            .member-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+    <style>
+        /* Light theme variables and system preference support */
+        :root.theme-light {
+            --bg-color: #f6f7fb;
+            --gradient-1: #ffffff;
+            --gradient-2: #f4f6ff;
+            --gradient-3: #eef2ff;
+            --gradient-4: #e6f3ff;
+            --gradient-5: #eaf9f5;
+            --gradient-6: #f7ecff;
+            --glass-bg: rgba(255, 255, 255, 0.65);
+            --glass-hover: rgba(255, 255, 255, 0.8);
+            --glass-border: rgba(0, 0, 0, 0.08);
+            --glass-border-hover: rgba(0, 0, 0, 0.18);
+            --text-primary: #0f141a;
+            --text-secondary: #3d4650;
+            --accent-color: #7b5cff;
+            --accent-hover: #5c8dff;
+            --accent-gradient: linear-gradient(135deg,#ff9a7a 5%,#ffc864 40%,#5cc9ff 75%,#9c7cff 100%);
+            --shadow-color: rgba(17, 24, 39, 0.08);
+            --glow-color: rgba(92, 201, 255, 0.35);
+        }
+        @media (prefers-color-scheme: light) { :root:not(.theme-dark):not(.theme-light) { color-scheme: light; } }
+        @media (prefers-color-scheme: dark) { :root:not(.theme-dark):not(.theme-light) { color-scheme: dark; } }
+
+        /* Light mode gradient override */
+        :root.theme-light body { background:
+            radial-gradient(circle at 18% 22%, var(--gradient-4) 0%, transparent 48%),
+            radial-gradient(circle at 78% 74%, var(--gradient-5) 0%, transparent 60%),
+            radial-gradient(circle at 85% 18%, var(--gradient-6) 0%, transparent 55%),
+            linear-gradient(115deg, var(--bg-color), #ffffff); }
+
+        /* Theme toggle control */
+        .theme-toggle { position: fixed; top: 16px; right: 16px; display: inline-flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 999px; border: 1px solid var(--glass-border); background: var(--glass-bg); color: var(--text-primary); cursor: pointer; backdrop-filter: blur(10px) saturate(140%); -webkit-backdrop-filter: blur(10px) saturate(140%); box-shadow: 0 8px 24px -10px var(--shadow-color); transition: var(--transition); user-select: none; z-index: 1000; }
+        .theme-toggle:hover { border-color: var(--glass-border-hover); transform: translateY(-1px); }
+        .theme-toggle svg { width: 18px; height: 18px; }
+        .icon-sun { display: none; }
+        .icon-moon { display: inline; }
+        :root.theme-light .icon-sun { display: inline; }
+        :root.theme-light .icon-moon { display: none; }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,1px,1px); white-space: nowrap; border: 0; }
+
+        /* Back to Home button */
+        .home-link { position: fixed; top: 16px; left: 16px; display: inline-flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 999px; border: 1px solid var(--glass-border); background: var(--glass-bg); color: var(--text-primary); text-decoration: none; cursor: pointer; backdrop-filter: blur(10px) saturate(140%); -webkit-backdrop-filter: blur(10px) saturate(140%); box-shadow: 0 8px 24px -10px var(--shadow-color); transition: var(--transition); user-select: none; z-index: 1000; }
+        .home-link:hover { border-color: var(--glass-border-hover); transform: translateY(-1px); }
+        .home-link svg { width: 18px; height: 18px; }
+
+        /* Subtle glass overrides to unify with index */
+        .club-info, .club-card, .assignment-section, .member-card, .student-item, .student-header, .student-work, .checkbox-container, .work-item { border-color: var(--glass-border) !important; }
+        .club-info, .club-card, .assignment-section, .member-card { background: var(--glass-bg) !important; box-shadow: 0 12px 30px -15px var(--shadow-color); }
+        .club-card:hover, .member-card:hover { background: var(--glass-hover) !important; border-color: var(--glass-border-hover) !important; }
+        .header h1 { background: linear-gradient(90deg,#0ff 0%,#ff9a7a 25%,#ffc864 50%,#5cc9ff 75%,#9c7cff 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+        </svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+        <span class="sr-only">Theme</span>
+    </button>
+    <a href="index.html" class="home-link" aria-label="Back to Home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 12l9-8 9 8"/>
+            <path d="M9 21V9h6v12"/>
+        </svg>
+        <span>Home</span>
+    </a>
+    <div class="container">
+        <header class="header">
+            <h1>🎓 Club Portal</h1>
+            <p>Member Work Assignment & Teacher Review System</p>
+        </header>
+
+        <div class="club-info">
+            <h2>Tech Innovators Club</h2>
+            <p>Manage work assignments for students across different teams. Assign tasks to students and view their assigned work in dropdown lists.</p>
+        </div>
+
+        <!-- Student-only: My Assigned Work panel (hidden for admins) -->
+        <div id="my-work-section" class="assignment-section" style="display:none">
+            <h3 class="section-title">🧑‍🎓 My Assigned Work</h3>
+            <div id="my-work-list"></div>
+        </div>
+
+        <div class="assignment-section">
+            <h3 class="section-title">📝 Assign Work to Student</h3>
+            <div class="assignment-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="selectTeam">Select Team</label>
+                        <select id="selectTeam" onchange="updateStudentList()">
+                            <option value="">-- Choose a team --</option>
+                            <option value="0">Design Team</option>
+                            <option value="1">Development Team</option>
+                            <option value="2">Research Team</option>
+                            <option value="3">Marketing Team</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label>Select Students</label>
+                        <div class="checkbox-container" id="studentCheckboxes">
+                            <p class="helper-text">Select a team first to see students</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label for="workTitle">Work Title</label>
+                        <input type="text" id="workTitle" placeholder="Enter work title">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label for="workDescription">Work Description</label>
+                        <textarea id="workDescription" placeholder="Enter work description" rows="3"></textarea>
+                    </div>
+                </div>
+                <button class="btn-assign" onclick="assignWork()">✓ Assign Work to Selected Students</button>
+            </div>
+        </div>
+
+        <div id="teamsContainer"></div>
+
+        <footer class="footer">
+            <p>&copy; 2025 Club Management System. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        (function() {
+            const storageKey = 'acs-theme';
+            const root = document.documentElement;
+            function applyTheme(mode) {
+                if (mode === 'light') { root.classList.add('theme-light'); root.classList.remove('theme-dark'); }
+                else if (mode === 'dark') { root.classList.add('theme-dark'); root.classList.remove('theme-light'); }
+                else { root.classList.remove('theme-light'); root.classList.remove('theme-dark'); }
+            }
+            const saved = localStorage.getItem(storageKey);
+            if (saved === 'light' || saved === 'dark') applyTheme(saved); else {
+                const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+                applyTheme(prefersLight ? 'light' : 'dark');
+            }
+            const btn = document.getElementById('themeToggle');
+            btn && btn.addEventListener('click', function(){
+                const isLight = root.classList.contains('theme-light');
+                const next = isLight ? 'dark' : 'light';
+                applyTheme(next);
+                try { localStorage.setItem(storageKey, next); } catch(e){}
+            });
+        })();
+
+        // One club with different teams
+        const clubPortal = {
+            name: "Tech Innovators Club",
+            teams: [
+                {
+                    id: 0,
+                    name: "Design Team",
+                    icon: "🎨",
+                    students: [
+                        { id: 1, name: "Prabdeep Singh", work: [] },
+                        { id: 2, name: "Priya Singh", work: [] },
+                        { id: 3, name: "Neha Gupta", work: [] }
+                    ]
+                },
+                {
+                    id: 1,
+                    name: "Development Team",
+                    icon: "💻",
+                    students: [
+                        { id: 4, name: "Armaanjot Singh", work: [] },
+                        { id: 5, name: "Vikram Sharma", work: [] },
+                        { id: 6, name: "Rohan Singh", work: [] }
+                    ]
+                },
+                {
+                    id: 2,
+                    name: "Research Team",
+                    icon: "🔬",
+                    students: [
+                        { id: 7, name: "Rajveer Singh", work: [] },
+                        { id: 8, name: "Aditya Verma", work: [] }
+                    ]
+                },
+                {
+                    id: 3,
+                    name: "Marketing Team",
+                    icon: "📢",
+                    students: [
+                        { id: 9, name: "Zara Khan", work: [] },
+                        { id: 10, name: "Preeti Singh", work: [] }
+                    ]
+                }
+            ]
+        };
+
+        function updateStudentList() {
+            const teamSelect = document.getElementById('selectTeam');
+            const checkboxContainer = document.getElementById('studentCheckboxes');
+            const teamIndex = teamSelect.value;
+
+            checkboxContainer.innerHTML = '';
+
+            if (teamIndex === '') {
+                checkboxContainer.innerHTML = '<p class="helper-text">Select a team first to see students</p>';
+                return;
+            }
+
+            const team = clubPortal.teams[teamIndex];
+            team.students.forEach(student => {
+                const checkboxWrapper = document.createElement('div');
+                checkboxWrapper.className = 'checkbox-wrapper';
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `student-${student.id}`;
+                checkbox.value = student.id;
+                checkbox.className = 'checkbox-input';
+
+                const label = document.createElement('label');
+                label.htmlFor = `student-${student.id}`;
+                label.textContent = student.name;
+                label.className = 'checkbox-label';
+
+                checkboxWrapper.appendChild(checkbox);
+                checkboxWrapper.appendChild(label);
+                checkboxContainer.appendChild(checkboxWrapper);
+            });
+        }
+
+        function getSelectedStudents() {
+            const checkboxes = document.querySelectorAll('.checkbox-input:checked');
+            return Array.from(checkboxes).map(checkbox => parseInt(checkbox.value));
+        }
+
+        function assignWork() {
+            const teamSelect = document.getElementById('selectTeam');
+            const workTitle = document.getElementById('workTitle');
+            const workDescription = document.getElementById('workDescription');
+            const selectedStudentIds = getSelectedStudents();
+
+            if (teamSelect.value === '' || selectedStudentIds.length === 0 || workTitle.value.trim() === '') {
+                alert('Please fill in all required fields and select at least one student');
+                return;
+            }
+
+            const teamIndex = teamSelect.value;
+            const team = clubPortal.teams[teamIndex];
+            const title = workTitle.value;
+            const desc = workDescription.value || 'No description provided';
+
+            // Load opt-out map and existing assignments store
+            const optOutMap = JSON.parse(localStorage.getItem('clubWorkOptOut') || '{}');
+            const assignmentsStore = JSON.parse(localStorage.getItem('clubAssignments') || '{}');
+
+            let assignedCount = 0;
+            let skippedCount = 0;
+
+            // Assign work to all selected students
+            selectedStudentIds.forEach(studentId => {
+                const student = team.students.find(s => s.id === studentId);
+                if (!student) return;
+                const studentKey = (student.name || '').toLowerCase();
+                if (optOutMap[studentKey]) { skippedCount++; return; }
+
+                const newWork = {
+                    id: `work-${Date.now()}-${studentId}`,
+                    title,
+                    description: desc,
+                    status: 'pending',
+                    team: team.name,
+                    assignedAt: new Date().toISOString()
+                };
+                // Update in-memory view
+                student.work.push({ id: newWork.id, title: newWork.title, description: newWork.description });
+                // Persist for student view
+                const existing = Array.isArray(assignmentsStore[studentKey]) ? assignmentsStore[studentKey] : [];
+                assignmentsStore[studentKey] = [...existing, newWork];
+                assignedCount++;
+            });
+
+            // Save updated assignments store
+            localStorage.setItem('clubAssignments', JSON.stringify(assignmentsStore));
+
+            // Clear form
+            workTitle.value = '';
+            workDescription.value = '';
+            teamSelect.value = '';
+            document.getElementById('studentCheckboxes').innerHTML = '<p class="helper-text">Select a team first to see students</p>';
+
+            if (assignedCount > 0 || skippedCount > 0) {
+                const msg = `✓ Assigned to ${assignedCount} student${assignedCount!==1?'s':''}` + (skippedCount>0?` (skipped ${skippedCount} opted-out)`:'' );
+                alert(msg);
+            }
+            renderTeams();
+        }
+
+        function toggleStudentWork(studentId, teamIndex) {
+            const workElement = document.getElementById(`work-${studentId}-${teamIndex}`);
+            const icon = document.getElementById(`icon-${studentId}-${teamIndex}`);
+            workElement.classList.toggle('open');
+            icon.classList.toggle('open');
+        }
+
+        function renderTeams() {
+            const container = document.getElementById('teamsContainer');
+            container.innerHTML = '';
+
+            clubPortal.teams.forEach((team, teamIndex) => {
+                const teamSection = document.createElement('div');
+                teamSection.className = 'team-section';
+
+                let studentsHTML = '';
+                team.students.forEach(student => {
+                    let workHTML = '';
+                    
+                    if (student.work.length === 0) {
+                        workHTML = `<p style="padding: 1rem; color: var(--text-secondary); font-size: 0.9rem;">No work assigned yet</p>`;
+                    } else {
+                        student.work.forEach(work => {
+                            workHTML += `
+                                <div class="assigned-work-item">
+                                    <div class="work-title-simple">${work.title}</div>
+                                    <div class="work-description-simple">${work.description}</div>
+                                </div>
+                            `;
+                        });
+                    }
+
+                    studentsHTML += `
+                        <div class="student-item">
+                            <div class="student-header" onclick="toggleStudentWork(${student.id}, ${teamIndex})">
+                                <div class="student-avatar-small">${student.name.substring(0, 2).toUpperCase()}</div>
+                                <div class="student-info-small">
+                                    <h4>${student.name}</h4>
+                                    <p>${student.work.length} task${student.work.length !== 1 ? 's' : ''} assigned</p>
+                                </div>
+                                <span class="expand-icon" id="icon-${student.id}-${teamIndex}">▼</span>
+                            </div>
+                            <div class="student-work" id="work-${student.id}-${teamIndex}">
+                                ${workHTML}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                teamSection.innerHTML = `
+                    <div class="team-title">
+                        <span class="team-icon">${team.icon}</span>
+                        <span>${team.name}</span>
+                    </div>
+                    <div class="students-list open">
+                        ${studentsHTML}
+                    </div>
+                `;
+
+                container.appendChild(teamSection);
+            });
+        }
+
+        // ---- Student "My Work" helpers ----
+        function getCurrentUserKey() {
+            try {
+                const u = JSON.parse(localStorage.getItem('user') || '{}');
+                return ((u.name || u.username || '') + '').toLowerCase();
+            } catch { return ''; }
+        }
+
+        function loadMyAssignments() {
+            const key = getCurrentUserKey();
+            if (!key) return [];
+            const store = JSON.parse(localStorage.getItem('clubAssignments') || '{}');
+            const arr = Array.isArray(store[key]) ? store[key] : [];
+            // sort newest first
+            return arr.slice().sort((a,b) => new Date(b.assignedAt||0) - new Date(a.assignedAt||0));
+        }
+
+        function saveAssignmentsForKey(key, items) {
+            const store = JSON.parse(localStorage.getItem('clubAssignments') || '{}');
+            store[key] = items;
+            localStorage.setItem('clubAssignments', JSON.stringify(store));
+        }
+
+        function renderMyWork() {
+            const list = document.getElementById('my-work-list');
+            if (!list) return;
+            const items = loadMyAssignments();
+            if (!items.length) {
+                list.innerHTML = '<p style="padding:1rem;color:var(--text-secondary);">No assignments yet.</p>';
+                return;
+            }
+            list.innerHTML = items.map(item => `
+                <div class="work-item ${item.status==='completed'?'completed':'pending'}">
+                    <div class="work-title">${item.title}</div>
+                    <div class="work-description">${item.description || ''}</div>
+                    <div class="work-status">
+                        <span class="status-badge ${item.status==='completed'?'status-completed':'status-pending'}">${item.status || 'pending'}</span>
+                        <span style="opacity:.7">${item.team ? '• ' + item.team : ''}</span>
+                        <span style="margin-left:auto"></span>
+                        ${item.status!=='completed' ? `<button onclick="markDone('${item.id}')" class="btn-assign" style="padding:.5rem 1rem; font-size:.8rem;">Mark Done</button>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function markDone(id) {
+            const key = getCurrentUserKey();
+            if (!key) return;
+            const store = JSON.parse(localStorage.getItem('clubAssignments') || '{}');
+            const arr = Array.isArray(store[key]) ? store[key] : [];
+            const updated = arr.map(it => it.id===id ? { ...it, status:'completed', completedAt: new Date().toISOString() } : it);
+            saveAssignmentsForKey(key, updated);
+            renderMyWork();
+        }
+
+        function initPortalForRole() {
+            let role = '';
+            try { const u = JSON.parse(localStorage.getItem('user')||'{}'); role = u.role || ''; } catch {}
+            const myWork = document.getElementById('my-work-section');
+            const assignSec = document.querySelector('.assignment-section');
+            const teams = document.getElementById('teamsContainer');
+            if (role === 'student') {
+                if (myWork) myWork.style.display = '';
+                if (assignSec) assignSec.style.display = 'none';
+                if (teams) teams.style.display = 'none';
+                renderMyWork();
+                // Poll occasionally to simulate realtime
+                setInterval(renderMyWork, 5000);
+            } else {
+                // Admin/teacher view
+                if (myWork) myWork.style.display = 'none';
+            }
+        }
+
+        // Initial render for admin/teacher view
+        renderTeams();
+        // Role-based UI
+        initPortalForRole();
+    </script>
+</body>
+</html>

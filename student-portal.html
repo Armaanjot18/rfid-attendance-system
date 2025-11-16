@@ -1,0 +1,2144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Portal - Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #0d0f12;
+            --gradient-1: #2d150c;
+            --gradient-2: #6d441f;
+            --gradient-3: #3a1c10;
+            --gradient-4: #1e2540;
+            --gradient-5: #0b3a3f;
+            --gradient-6: #3d1f39;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-hover: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --glass-border-hover: rgba(255, 255, 255, 0.35);
+            --text-primary: #e9e9e9;
+            --text-secondary: #b7b7b7;
+            --accent-color: #e3c29c;
+            --accent-hover: #f4d9b3;
+            --accent-gradient: linear-gradient(135deg,#ff7d5e 5%,#e3c29c 45%,#6ec6ff 75%,#c792ea 100%);
+            --shadow-color: rgba(227, 194, 156, 0.25);
+            --glow-color: rgba(198,146,234,0.45);
+            --radius-lg: 16px;
+            --transition: 0.45s cubic-bezier(.4,.2,.2,1);
+            --card-color: rgba(255,255,255,0.04);
+            --border-color: var(--glass-border);
+            --green: #3FB950;
+            --yellow: #D29922;
+            --red: #F85149;
+            --orange: #F78166;
+        }
+        :root.theme-light {
+            --bg-color: #f6f7fb;
+            --gradient-1: #ffffff;
+            --gradient-2: #f4f6ff;
+            --gradient-3: #eef2ff;
+            --gradient-4: #e6f3ff;
+            --gradient-5: #eaf9f5;
+            --gradient-6: #f7ecff;
+            --glass-bg: rgba(255, 255, 255, 0.65);
+            --glass-hover: rgba(255, 255, 255, 0.8);
+            --glass-border: rgba(0, 0, 0, 0.08);
+            --glass-border-hover: rgba(0, 0, 0, 0.18);
+            --text-primary: #0f141a;
+            --text-secondary: #3d4650;
+            --accent-color: #7b5cff;
+            --accent-hover: #5c8dff;
+            --accent-gradient: linear-gradient(135deg,#ff9a7a 5%,#ffc864 40%,#5cc9ff 75%,#9c7cff 100%);
+            --shadow-color: rgba(17, 24, 39, 0.08);
+            --glow-color: rgba(92, 201, 255, 0.35);
+        }
+        @media (prefers-color-scheme: light) { :root:not(.theme-dark):not(.theme-light) { color-scheme: light; } }
+        @media (prefers-color-scheme: dark) { :root:not(.theme-dark):not(.theme-light) { color-scheme: dark; } }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background:
+                radial-gradient(circle at 18% 22%, var(--gradient-4) 0%, transparent 48%),
+                radial-gradient(circle at 78% 74%, var(--gradient-5) 0%, transparent 60%),
+                radial-gradient(circle at 85% 18%, var(--gradient-6) 0%, transparent 55%),
+                linear-gradient(115deg, var(--gradient-3), var(--bg-color));
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2.5rem;
+        }
+        :root.theme-light body { background:
+            radial-gradient(circle at 18% 22%, var(--gradient-4) 0%, transparent 48%),
+            radial-gradient(circle at 78% 74%, var(--gradient-5) 0%, transparent 60%),
+            radial-gradient(circle at 85% 18%, var(--gradient-6) 0%, transparent 55%),
+            linear-gradient(115deg, var(--bg-color), #ffffff); }
+
+        .container {
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 2rem;
+        }
+
+        .header-left h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header-left p {
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .student-info {
+            text-align: right;
+        }
+
+        .student-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .student-id {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .logout-btn {
+            margin-top: 0.5rem;
+            padding: 0.5rem 1rem;
+            background-color: var(--card-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            background-color: var(--border-color);
+        }
+
+        /* Club work toggle */
+        .club-toggle { margin-top: .75rem; display: inline-flex; align-items: center; gap: .6rem; font-size: .9rem; color: var(--text-secondary); }
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; inset: 0; background: var(--card-color); border: 1px solid var(--border-color); transition: .2s; border-radius: 999px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; top: 50%; transform: translateY(-50%); background: var(--text-secondary); transition: .2s; border-radius: 50%; }
+        input:checked + .slider { background: rgba(63,185,80,0.2); border-color: rgba(63,185,80,0.5); }
+        input:checked + .slider:before { transform: translate(20px, -50%); background: var(--green); }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .summary-card {
+            background-color: var(--card-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: transform 0.2s;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .card-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+        }
+
+        .card-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .panel {
+            background-color: var(--card-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .panel-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+        }
+
+        .subjects-grid {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .subject-card {
+            background-color: #0D1117;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .subject-card:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .subject-card.expanded {
+            border-color: var(--accent-color);
+        }
+
+        .subject-header {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .subject-info h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .subject-details {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .attendance-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .subject-card.expanded .attendance-details {
+            max-height: 500px;
+            margin-top: 1.5rem;
+        }
+
+        .attendance-list {
+            display: grid;
+            gap: 0.75rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .attendance-entry {
+            display: grid;
+            grid-template-columns: 120px 1fr 80px;
+            gap: 1rem;
+            padding: 0.75rem;
+            background-color: var(--card-color);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            align-items: center;
+        }
+
+        .entry-date {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .entry-time {
+            color: var(--text-primary);
+        }
+
+        .entry-status {
+            text-align: right;
+            font-weight: 600;
+        }
+
+        .entry-status.present {
+            color: var(--green);
+        }
+
+        .entry-status.absent {
+            color: var(--red);
+        }
+
+        .expand-icon {
+            transition: transform 0.3s;
+            color: var(--text-secondary);
+        }
+
+        .subject-card.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .subject-stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 80px;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .stat-value.good {
+            color: var(--green);
+        }
+
+        .stat-value.warning {
+            color: var(--yellow);
+        }
+
+        .stat-value.poor {
+            color: var(--red);
+        }
+
+        .attendance-bar-container {
+            width: 100%;
+            height: 8px;
+            background-color: #2d333b;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .attendance-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .secondary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2.5rem;
+        }
+
+        .schedule-item {
+            padding: 1rem;
+            background-color: #0D1117;
+            border-left: 3px solid var(--accent-color);
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        .schedule-time {
+            font-size: 0.85rem;
+            color: var(--accent-color);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .schedule-subject {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .schedule-room {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .leave-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            padding: 0.75rem;
+            background-color: #0D1117;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input[type="file"] {
+            padding: 0.5rem;
+            cursor: pointer;
+        }
+
+        .form-group input[type="file"]::file-selector-button {
+            padding: 0.5rem 1rem;
+            background-color: var(--card-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            margin-right: 1rem;
+            transition: all 0.2s;
+        }
+
+        .form-group input[type="file"]::file-selector-button:hover {
+            background-color: var(--border-color);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .submit-btn {
+            padding: 0.875rem 1.5rem;
+            background-color: var(--accent-color);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .submit-btn:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-success {
+            background-color: rgba(63, 185, 80, 0.2);
+            color: var(--green);
+        }
+
+        .badge-warning {
+            background-color: rgba(210, 153, 34, 0.2);
+            color: var(--yellow);
+        }
+
+        .badge-danger {
+            background-color: rgba(248, 81, 73, 0.2);
+            color: var(--red);
+        }
+
+        .leave-application-card {
+            background-color: #0d1117;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .leave-app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .leave-app-type {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .leave-app-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background-color: rgba(210, 153, 34, 0.2);
+            color: var(--yellow);
+        }
+
+        .status-approved {
+            background-color: rgba(63, 185, 80, 0.2);
+            color: var(--green);
+        }
+
+        .status-rejected {
+            background-color: rgba(248, 81, 73, 0.2);
+            color: var(--red);
+        }
+
+        .leave-app-dates {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .leave-app-reason {
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            background-color: #1c2128;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .leave-app-remarks {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-style: italic;
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background-color: rgba(248, 81, 73, 0.1);
+            border-left: 3px solid var(--red);
+            border-radius: 4px;
+        }
+
+        .leave-app-submitted {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Club Duties Styles */
+        .clubs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .duty-card {
+            background-color: var(--card-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            transition: all var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .duty-card:hover {
+            border-color: var(--glass-border-hover);
+            background-color: var(--glass-hover);
+            transform: translateY(-2px);
+        }
+
+        .duty-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent-gradient);
+        }
+
+        .duty-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .duty-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .duty-club {
+            display: inline-block;
+            font-size: 0.75rem;
+            color: var(--accent-color);
+            background-color: rgba(227, 194, 156, 0.1);
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+        }
+
+        .duty-description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .duty-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .duty-date {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .duty-date strong {
+            color: var(--text-primary);
+        }
+
+        .duty-priority {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .duty-priority.high {
+            background-color: rgba(248, 81, 73, 0.2);
+            color: var(--red);
+        }
+
+        .duty-priority.medium {
+            background-color: rgba(210, 153, 34, 0.2);
+            color: var(--yellow);
+        }
+
+        .duty-priority.low {
+            background-color: rgba(63, 185, 80, 0.2);
+            color: var(--green);
+        }
+
+        .duty-status {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .duty-status.pending {
+            background-color: rgba(210, 153, 34, 0.2);
+            color: var(--yellow);
+        }
+
+        .duty-status.in_progress {
+            background-color: rgba(110, 198, 255, 0.2);
+            color: #6ec6ff;
+        }
+
+        .duty-status.completed {
+            background-color: rgba(63, 185, 80, 0.2);
+            color: var(--green);
+        }
+
+        .duty-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .duty-btn {
+            flex: 1;
+            padding: 0.6rem 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .duty-btn-primary {
+            background: var(--accent-gradient);
+            color: #fff;
+        }
+
+        .duty-btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .duty-btn-secondary {
+            background-color: var(--card-color);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .duty-btn-secondary:hover {
+            background-color: var(--glass-hover);
+            border-color: var(--glass-border-hover);
+        }
+
+        .update-count {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        /* Update Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, var(--gradient-3), var(--bg-color));
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: var(--text-primary);
+        }
+
+        .update-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .update-history {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .update-history-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .update-item {
+            background-color: var(--card-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .update-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .update-type {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .update-type.progress {
+            background-color: rgba(110, 198, 255, 0.2);
+            color: #6ec6ff;
+        }
+
+        .update-type.completed {
+            background-color: rgba(63, 185, 80, 0.2);
+            color: var(--green);
+        }
+
+        .update-type.issue {
+            background-color: rgba(248, 81, 73, 0.2);
+            color: var(--red);
+        }
+
+        .update-type.question {
+            background-color: rgba(210, 153, 34, 0.2);
+            color: var(--yellow);
+        }
+
+        .update-date {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .update-message {
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .badge {
+            background: var(--accent-gradient);
+            color: #fff;
+            padding: 0.35rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        @media (max-width: 1400px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            .clubs-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+        }
+
+        @media (max-width: 1200px) {
+            body {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            .student-info {
+                text-align: left;
+            }
+            .clubs-grid {
+                grid-template-columns: 1fr;
+            }
+            .panel {
+                padding: 1rem;
+            }
+            .subject-card {
+                padding: 0.875rem;
+            }
+        }
+
+        /* --- Chatbot Styles --- */
+        .chat-widget-button {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            background-color: var(--accent-color);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(88, 166, 255, 0.3);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .chat-widget-button:hover {
+            background-color: var(--accent-hover);
+            transform: scale(1.1);
+        }
+
+        .chat-widget-button .icon {
+            font-size: 2rem;
+            color: white;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+        
+        .chat-widget-button .close-icon {
+            opacity: 0;
+            transform: scale(0);
+            position: absolute;
+        }
+
+        .chat-widget-button.open .icon {
+            opacity: 0;
+            transform: scale(0);
+        }
+        
+        .chat-widget-button.open .close-icon {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .chat-window {
+            position: fixed;
+            bottom: 6.5rem;
+            right: 2rem;
+            width: 370px;
+            max-width: 90vw;
+            height: 500px;
+            background-color: var(--card-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 999;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+            transform: scale(0.95) translateY(10px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .chat-window.open {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .chat-header {
+            padding: 1rem;
+            background-color: #0D1117;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .chat-header h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .chat-header p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .message {
+            display: flex;
+            max-width: 85%;
+            padding: 0.75rem 1rem;
+            border-radius: 18px;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background-color: var(--accent-color);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.bot {
+            align-self: flex-start;
+            background-color: #21262D;
+            color: var(--text-primary);
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-input-area {
+            display: flex;
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .chat-input {
+            flex-grow: 1;
+            padding: 0.75rem;
+            background-color: #0D1117;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            margin-right: 0.5rem;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .send-btn {
+            padding: 0.75rem 1rem;
+            background-color: var(--accent-color);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        /* Theme toggle */
+        .theme-toggle { position: fixed; top: 16px; right: 16px; display: inline-flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 999px; border: 1px solid var(--glass-border); background: var(--glass-bg); color: var(--text-primary); cursor: pointer; backdrop-filter: blur(10px) saturate(140%); -webkit-backdrop-filter: blur(10px) saturate(140%); box-shadow: 0 8px 24px -10px var(--shadow-color); transition: var(--transition); user-select: none; }
+        .theme-toggle:hover { border-color: var(--glass-border-hover); transform: translateY(-1px); }
+        .theme-toggle svg { width: 18px; height: 18px; }
+        .icon-sun { display: none; }
+        .icon-moon { display: inline; }
+        :root.theme-light .icon-sun { display: inline; }
+        :root.theme-light .icon-moon { display: none; }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,1px,1px); white-space: nowrap; border: 0; }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+        </svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+        <span class="sr-only">Theme</span>
+    </button>
+    <div class="container">
+        <header class="header">
+            <div class="header-left">
+                <h1>Student Portal</h1>
+                <p>Welcome back! Here's your academic overview</p>
+            </div>
+            <div class="student-info">
+                <div class="student-name" id="student-name-display">Loading...</div>
+                <div class="student-id" id="student-id-display">Loading...</div>
+                <a href="index.html" class="logout-btn" onclick="localStorage.clear()">Logout</a>
+                <div class="club-toggle" title="Allow clubs to assign you work">
+                    <label class="switch">
+                        <input type="checkbox" id="club-allow-toggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span id="club-allow-label">Club Work: On</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Summary Cards -->
+        <section class="summary-grid">
+            <div class="summary-card">
+                <div class="card-label">Overall Attendance</div>
+                <div class="card-value" style="color: var(--green);">95%</div>
+                <div class="card-subtitle">87 of 92 classes attended</div>
+            </div>
+            <div class="summary-card">
+                <div class="card-label">Active Courses</div>
+                <div class="card-value" style="color: var(--orange);">6</div>
+                <div class="card-subtitle">Current semester</div>
+            </div>
+        </section>
+
+        <!-- Main Content Grid -->
+        <div class="main-grid">
+            <!-- Subject-wise Performance -->
+            <div class="panel">
+                <h2 class="panel-title">Subject Performance</h2>
+                <div class="subjects-grid" id="subjects-container">
+                    <!-- Subjects will be dynamically generated -->
+                </div>
+            </div>
+
+            <!-- Attendance Overview Chart -->
+            <div class="panel">
+                <h2 class="panel-title">Attendance Overview</h2>
+                <div class="chart-container">
+                    <canvas id="attendanceChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Secondary Content Grid -->
+        <div class="secondary-grid">
+            <!-- Today's Schedule -->
+            <div class="panel">
+                <h2 class="panel-title">Today's Schedule</h2>
+                <div id="schedule-container">
+                    <div class="schedule-item">
+                        <div class="schedule-time">09:00 AM - 10:00 AM</div>
+                        <div class="schedule-subject">PPS</div>
+                        <div class="schedule-room">Room 301, Lab A</div>
+                    </div>
+                    <div class="schedule-item">
+                        <div class="schedule-time">10:15 AM - 11:15 AM</div>
+                        <div class="schedule-subject">EDG</div>
+                        <div class="schedule-room">Room 205</div>
+                    </div>
+                    <div class="schedule-item">
+                        <div class="schedule-time">12:00 PM - 01:00 PM</div>
+                        <div class="schedule-subject">PHYSICS</div>
+                        <div class="schedule-room">Room 402, Lab B</div>
+                    </div>
+                    <div class="schedule-item">
+                        <div class="schedule-time">02:00 PM - 03:00 PM</div>
+                        <div class="schedule-subject">Mathematics</div>
+                        <div class="schedule-room">Room 108</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Club Duties Section -->
+            <div class="panel" id="club-duties-panel" style="grid-column: 1 / -1;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2 class="panel-title">My Club Duties</h2>
+                    <span id="duty-count-badge" class="badge">0</span>
+                </div>
+                <div id="club-duties-grid" class="clubs-grid">
+                    <p style="color: var(--text-secondary); text-align: center;">Loading club duties...</p>
+                </div>
+            </div>
+
+            <!-- My Leave Applications Status -->
+            <div class="panel">
+                <h2 class="panel-title">My Leave Applications</h2>
+                <div id="leave-applications-list">
+                    <p style="color: var(--text-secondary); text-align: center;">Loading your leave applications...</p>
+                </div>
+            </div>
+
+            <!-- Leave Application -->
+            <div class="panel">
+                <h2 class="panel-title">Submit Leave Application</h2>
+                <form class="leave-form" id="leave-form">
+                    <div class="form-group">
+                        <label for="leave-type">Leave Type</label>
+                        <select id="leave-type" name="leave-type" required>
+                            <option value="">Select leave type</option>
+                            <option value="duty">Duty Leave</option>
+                            <option value="medical">Medical Leave</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="from-date">From Date</label>
+                        <input type="date" id="from-date" name="from-date" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="to-date">To Date</label>
+                        <input type="date" id="to-date" name="to-date" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reason">Reason</label>
+                        <textarea id="reason" name="reason" placeholder="Enter reason for leave..." required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="teacher-select">Send To Teacher</label>
+                        <select id="teacher-select" name="teacher-select" required>
+                            <option value="">Select teacher</option>
+                            <option value="pps-user">PPS Teacher</option>
+                            <option value="maths-user">Mathematics Teacher</option>
+                            <option value="physics-user">Physics Teacher</option>
+                            <option value="science-user">Science Teacher</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="leave-document">Upload Document (PDF)</label>
+                        <input type="file" id="leave-document" name="leave-document" accept=".pdf,.jpg,.jpeg,.png" required>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Submit Application</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Chatbot -->
+    <div class="chat-widget-button" id="chat-toggle">
+        <span class="icon">💬</span>
+        <span class="close-icon">✖️</span>
+    </div>
+    <div class="chat-window" id="chat-window">
+        <div class="chat-header">
+            <h3>AI Assistant</h3>
+            <p>Ask me about your attendance, schedule, or how to apply for leave.</p>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <div class="message bot">Hello! How can I help you today?</div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="chat-input" class="chat-input" placeholder="Type your message...">
+            <button class="send-btn" id="send-btn">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        let currentStudentData = null;
+
+        // Fetch student data from backend
+        async function fetchStudentData() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const studentId = user.studentId;
+
+            if (!studentId) {
+                console.log('No student ID found, using default data');
+                return null;
+            }
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_URL}/students/${studentId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    currentStudentData = result.data;
+                    return result.data;
+                }
+            } catch (error) {
+                console.error('Error fetching student data:', error);
+            }
+            return null;
+        }
+
+        // Auto-refresh student data every 5 seconds
+        setInterval(async () => {
+            const data = await fetchStudentData();
+            if (data && currentStudentData) {
+                // Update subjects with new data
+                updateSubjectsFromBackend(data);
+                console.log('✅ Student data refreshed:', new Date().toLocaleTimeString());
+            }
+        }, 5000);
+
+        // Fetch and display student's leave applications
+        async function fetchLeaveApplications() {
+            try {
+                const token = localStorage.getItem('token');
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                
+                if (!user.studentId) {
+                    document.getElementById('leave-applications-list').innerHTML = 
+                        '<p style="color: var(--text-secondary); text-align: center;">Please login to view your applications</p>';
+                    return;
+                }
+                
+                const response = await fetch(`${API_URL}/attendance/leave-requests/${user.studentId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayLeaveApplications(result.data);
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                console.error('Error fetching leave applications:', error);
+                document.getElementById('leave-applications-list').innerHTML = 
+                    '<p style="color: var(--red); text-align: center;">Error loading applications</p>';
+            }
+        }
+
+        function displayLeaveApplications(applications) {
+            const container = document.getElementById('leave-applications-list');
+            
+            if (!applications || applications.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">No leave applications found</p>';
+                return;
+            }
+            
+            // Sort by submission date (newest first)
+            applications.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+            
+            container.innerHTML = applications.map(app => {
+                const statusClass = `status-${app.status}`;
+                const leaveTypeText = app.type === 'duty' ? 'Duty Leave' : 'Medical Leave';
+                const submittedDate = new Date(app.submittedAt).toLocaleDateString('en-US', { 
+                    month: 'short', day: 'numeric', year: 'numeric', 
+                    hour: '2-digit', minute: '2-digit' 
+                });
+                
+                return `
+                    <div class="leave-application-card">
+                        <div class="leave-app-header">
+                            <span class="leave-app-type">${leaveTypeText}</span>
+                            <span class="leave-app-status ${statusClass}">${app.status}</span>
+                        </div>
+                        <div class="leave-app-dates">
+                            📅 ${formatDate(app.startDate)} - ${formatDate(app.endDate)}
+                        </div>
+                        <div class="leave-app-reason">
+                            <strong>Reason:</strong> ${app.reason}
+                        </div>
+                        ${app.status === 'rejected' && app.remarks ? `
+                            <div class="leave-app-remarks">
+                                <strong>Rejection Reason:</strong> ${app.remarks}
+                            </div>
+                        ` : ''}
+                        <div class="leave-app-submitted">
+                            Submitted: ${submittedDate}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        // ========== CLUB DUTIES FUNCTIONS ==========
+        
+        // Fetch and display club duties
+        async function fetchClubDuties() {
+            try {
+                const token = localStorage.getItem('token');
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                
+                if (!user.studentId) {
+                    document.getElementById('club-duties-grid').innerHTML = 
+                        '<p style="color: var(--text-secondary); text-align: center; grid-column: 1 / -1;">Please login to view your club duties</p>';
+                    return;
+                }
+                
+                const response = await fetch(`${API_URL}/clubs/student/${user.studentId}/duties`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) throw new Error('Failed to fetch club duties');
+                
+                const result = await response.json();
+                
+                if (result.success && result.duties && result.duties.length > 0) {
+                    displayClubDuties(result.duties);
+                    document.getElementById('duty-count-badge').textContent = result.duties.filter(d => d.status !== 'completed').length;
+                } else {
+                    document.getElementById('club-duties-grid').innerHTML = 
+                        '<p style="color: var(--text-secondary); text-align: center; grid-column: 1 / -1;">No club duties assigned yet. Join a club to get started!</p>';
+                    document.getElementById('duty-count-badge').textContent = '0';
+                }
+            } catch (error) {
+                console.error('Error fetching club duties:', error);
+                document.getElementById('club-duties-grid').innerHTML = 
+                    '<p style="color: var(--red); text-align: center; grid-column: 1 / -1;">Failed to load club duties. Please try again.</p>';
+            }
+        }
+
+        // Display club duties
+        function displayClubDuties(duties) {
+            const grid = document.getElementById('club-duties-grid');
+            
+            if (duties.length === 0) {
+                grid.innerHTML = '<p style="color: var(--text-secondary); text-align: center; grid-column: 1 / -1;">No duties assigned</p>';
+                return;
+            }
+            
+            grid.innerHTML = duties.map(duty => `
+                <div class="duty-card">
+                    <div class="duty-header">
+                        <div>
+                            <span class="duty-club">${duty.club_name} - ${duty.position}</span>
+                            <h3 class="duty-title">${duty.duty_title}</h3>
+                        </div>
+                        <span class="duty-status ${duty.status}">${duty.status.replace('_', ' ')}</span>
+                    </div>
+                    
+                    <p class="duty-description">${duty.duty_description || 'No description provided'}</p>
+                    
+                    <div class="duty-meta">
+                        <div class="duty-date">
+                            <strong>Due:</strong> ${formatDate(duty.due_date || duty.assigned_date)}
+                        </div>
+                        <span class="duty-priority ${duty.priority}">${duty.priority}</span>
+                    </div>
+                    
+                    <div class="update-count">
+                        📝 ${duty.update_count || 0} update${duty.update_count !== 1 ? 's' : ''} submitted
+                    </div>
+                    
+                    <div class="duty-actions">
+                        <button class="duty-btn duty-btn-primary" onclick="openUpdateModal(${duty.duty_id}, '${duty.duty_title}', '${duty.club_name}')">
+                            Submit Update
+                        </button>
+                        <button class="duty-btn duty-btn-secondary" onclick="viewDutyDetails(${duty.duty_id})">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Open update modal
+        function openUpdateModal(dutyId, dutyTitle, clubName) {
+            const modalHTML = `
+                <div class="modal active" id="update-modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <div>
+                                <h2 class="modal-title">Submit Update</h2>
+                                <p style="color: var(--text-secondary); margin-top: 0.5rem;">${dutyTitle} - ${clubName}</p>
+                            </div>
+                            <button class="modal-close" onclick="closeUpdateModal()">&times;</button>
+                        </div>
+                        
+                        <form class="update-form" id="duty-update-form">
+                            <div class="form-group">
+                                <label for="update-type">Update Type</label>
+                                <select id="update-type" required>
+                                    <option value="progress">Progress Update</option>
+                                    <option value="completed">Mark as Completed</option>
+                                    <option value="issue">Report Issue</option>
+                                    <option value="question">Ask Question</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="update-message">Update Message</label>
+                                <textarea id="update-message" rows="4" placeholder="Describe your progress, issues, or questions..." required></textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn-primary" style="width: 100%; padding: 0.75rem;">
+                                Submit Update
+                            </button>
+                        </form>
+                        
+                        <div class="update-history" id="update-history-${dutyId}">
+                            <h3 class="update-history-title">Previous Updates</h3>
+                            <p style="color: var(--text-secondary); text-align: center;">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remove existing modal if any
+            const existingModal = document.getElementById('update-modal');
+            if (existingModal) existingModal.remove();
+            
+            // Add modal to body
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            
+            // Load previous updates
+            loadDutyUpdates(dutyId);
+            
+            // Handle form submission
+            document.getElementById('duty-update-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await submitDutyUpdate(dutyId);
+            });
+        }
+
+        // Close update modal
+        function closeUpdateModal() {
+            const modal = document.getElementById('update-modal');
+            if (modal) modal.remove();
+        }
+
+        // Load duty updates
+        async function loadDutyUpdates(dutyId) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_URL}/clubs/duties/${dutyId}/updates`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const result = await response.json();
+                const container = document.getElementById(`update-history-${dutyId}`);
+                
+                if (result.success && result.updates && result.updates.length > 0) {
+                    const updatesHTML = result.updates.map(update => `
+                        <div class="update-item">
+                            <div class="update-item-header">
+                                <span class="update-type ${update.update_type}">${update.update_type}</span>
+                                <span class="update-date">${new Date(update.created_at).toLocaleString()}</span>
+                            </div>
+                            <p class="update-message">${update.update_message}</p>
+                        </div>
+                    `).join('');
+                    
+                    container.innerHTML = `
+                        <h3 class="update-history-title">Previous Updates</h3>
+                        ${updatesHTML}
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <h3 class="update-history-title">Previous Updates</h3>
+                        <p style="color: var(--text-secondary); text-align: center;">No updates yet. Be the first to submit!</p>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading duty updates:', error);
+            }
+        }
+
+        // Submit duty update
+        async function submitDutyUpdate(dutyId) {
+            try {
+                const updateType = document.getElementById('update-type').value;
+                const updateMessage = document.getElementById('update-message').value;
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                const token = localStorage.getItem('token');
+                
+                const response = await fetch(`${API_URL}/clubs/duties/${dutyId}/updates`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        studentId: user.studentId,
+                        updateMessage: updateMessage,
+                        updateType: updateType,
+                        newStatus: updateType === 'completed' ? 'completed' : (updateType === 'progress' ? 'in_progress' : null)
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('✅ Update submitted successfully! Club heads will be notified.');
+                    closeUpdateModal();
+                    fetchClubDuties(); // Refresh duties list
+                } else {
+                    alert('❌ Failed to submit update: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error submitting duty update:', error);
+                alert('❌ Failed to submit update. Please try again.');
+            }
+        }
+
+        // View duty details (placeholder)
+        function viewDutyDetails(dutyId) {
+            alert(`Viewing details for duty #${dutyId}. Full details view coming soon!`);
+        }
+
+        // Fetch club duties on page load
+        fetchClubDuties();
+        
+        // Auto-refresh club duties every 30 seconds
+        setInterval(fetchClubDuties, 30000);
+
+        // Fetch leave applications on page load
+        fetchLeaveApplications();
+        
+        // Auto-refresh leave applications every 10 seconds
+        setInterval(fetchLeaveApplications, 10000);
+
+        // Leave Form Submission Handler
+        document.getElementById('leave-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const leaveType = document.getElementById('leave-type').value;
+            const fromDate = document.getElementById('from-date').value;
+            const toDate = document.getElementById('to-date').value;
+            const reason = document.getElementById('reason').value;
+            const teacherSelect = document.getElementById('teacher-select').value;
+            const fileInput = document.getElementById('leave-document');
+            const file = fileInput.files[0];
+            
+            // Validate inputs
+            if (!teacherSelect) {
+                alert('Please select a teacher to send the leave application to.');
+                return;
+            }
+            
+            if (!file) {
+                alert('Please select a document to upload with your leave application.');
+                return;
+            }
+            
+            try {
+                // Get token and user info from localStorage
+                const token = localStorage.getItem('token');
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                
+                if (!token || !user.studentId) {
+                    alert('Please login first to submit leave application.');
+                    return;
+                }
+                
+                // Convert file to base64
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    const documentData = e.target.result;
+                    
+                    // Prepare leave request data
+                    const leaveData = {
+                        studentId: user.studentId,
+                        studentName: user.name || user.username,
+                        startDate: fromDate,
+                        endDate: toDate,
+                        reason: reason,
+                        type: leaveType,
+                        sentTo: teacherSelect,
+                        documentData: documentData,
+                        documentName: file.name
+                    };
+                    
+                    console.log('Submitting leave request:', leaveData);
+                    
+                    // Submit to backend
+                    const response = await fetch(`${API_URL}/attendance/leave`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(leaveData)
+                    });
+                    
+                    console.log('Response status:', response.status);
+                    
+                    const result = await response.json();
+                    
+                    console.log('Server response:', result);
+                    
+                    if (result.success) {
+                        const leaveTypeText = leaveType === 'duty' ? 'Duty Leave' : 'Medical Leave';
+                        const teacherName = teacherSelect.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        alert(`Leave Application Submitted Successfully!\n\nType: ${leaveTypeText}\nFrom: ${fromDate}\nTo: ${toDate}\nSent to: ${teacherName}\nReason: ${reason}\nDocument: ${file.name}\n\nYour application has been sent for approval.`);
+                        
+                        // Reset form
+                        document.getElementById('leave-form').reset();
+                        
+                        // Refresh leave applications list
+                        fetchLeaveApplications();
+                    } else {
+                        console.error('Submission failed:', result);
+                        alert('Failed to submit leave application: ' + (result.message || 'Unknown error'));
+                    }
+                };
+                
+                reader.readAsDataURL(file);
+                
+            } catch (error) {
+                console.error('Leave submission error:', error);
+                alert('An error occurred while submitting your leave application. Please try again.');
+            }
+        });
+
+        // Subject Data with attendance records (will be updated from backend)
+        let subjects = [
+            { 
+                name: 'PPS', 
+                code: 'ENG101', 
+                attendance: 98,
+                totalClasses: 20,
+                attendedClasses: 20,
+                records: [
+                    { date: 'Nov 7, 2025', time: '09:00 AM', status: 'present' },
+                    { date: 'Nov 6, 2025', time: '09:00 AM', status: 'present' },
+                    { date: 'Nov 5, 2025', time: '09:00 AM', status: 'present' },
+                    { date: 'Nov 4, 2025', time: '09:00 AM', status: 'present' },
+                    { date: 'Nov 1, 2025', time: '09:00 AM', status: 'present' },
+                    { date: 'Oct 31, 2025', time: '09:00 AM', status: 'present' },
+                    { date: 'Oct 30, 2025', time: '09:00 AM', status: 'present' },
+                    { date: 'Oct 29, 2025', time: '09:00 AM', status: 'present' }
+                ]
+            },
+            { 
+                name: 'EDG', 
+                code: 'ENG102', 
+                attendance: 95,
+                totalClasses: 18,
+                attendedClasses: 17,
+                records: [
+                    { date: 'Nov 7, 2025', time: '10:15 AM', status: 'present' },
+                    { date: 'Nov 6, 2025', time: '10:15 AM', status: 'present' },
+                    { date: 'Nov 5, 2025', time: '10:15 AM', status: 'present' },
+                    { date: 'Nov 4, 2025', time: '10:15 AM', status: 'absent' },
+                    { date: 'Nov 1, 2025', time: '10:15 AM', status: 'present' },
+                    { date: 'Oct 31, 2025', time: '10:15 AM', status: 'present' },
+                    { date: 'Oct 30, 2025', time: '10:15 AM', status: 'present' }
+                ]
+            },
+            { 
+                name: 'Physics', 
+                code: 'PHY101', 
+                attendance: 92,
+                totalClasses: 19,
+                attendedClasses: 17,
+                records: [
+                    { date: 'Nov 7, 2025', time: '12:00 PM', status: 'present' },
+                    { date: 'Nov 6, 2025', time: '12:00 PM', status: 'present' },
+                    { date: 'Nov 5, 2025', time: '12:00 PM', status: 'absent' },
+                    { date: 'Nov 4, 2025', time: '12:00 PM', status: 'present' },
+                    { date: 'Nov 1, 2025', time: '12:00 PM', status: 'present' },
+                    { date: 'Oct 31, 2025', time: '12:00 PM', status: 'absent' },
+                    { date: 'Oct 30, 2025', time: '12:00 PM', status: 'present' }
+                ]
+            },
+            { 
+                name: 'Mathematics', 
+                code: 'MATH101', 
+                attendance: 97,
+                totalClasses: 17,
+                attendedClasses: 17,
+                records: [
+                    { date: 'Nov 7, 2025', time: '02:00 PM', status: 'present' },
+                    { date: 'Nov 6, 2025', time: '02:00 PM', status: 'present' },
+                    { date: 'Nov 5, 2025', time: '02:00 PM', status: 'present' },
+                    { date: 'Nov 4, 2025', time: '02:00 PM', status: 'present' },
+                    { date: 'Nov 1, 2025', time: '02:00 PM', status: 'present' },
+                    { date: 'Oct 31, 2025', time: '02:00 PM', status: 'present' }
+                ]
+            },
+            { 
+                name: 'Economics', 
+                code: 'ECO101', 
+                attendance: 89,
+                totalClasses: 18,
+                attendedClasses: 16,
+                records: [
+                    { date: 'Nov 7, 2025', time: '11:00 AM', status: 'present' },
+                    { date: 'Nov 6, 2025', time: '11:00 AM', status: 'absent' },
+                    { date: 'Nov 5, 2025', time: '11:00 AM', status: 'present' },
+                    { date: 'Nov 4, 2025', time: '11:00 AM', status: 'present' },
+                    { date: 'Nov 1, 2025', time: '11:00 AM', status: 'present' },
+                    { date: 'Oct 31, 2025', time: '11:00 AM', status: 'absent' },
+                    { date: 'Oct 30, 2025', time: '11:00 AM', status: 'present' }
+                ]
+            },
+            { 
+                name: 'Chemistry', 
+                code: 'CHEM101', 
+                attendance: 94,
+                totalClasses: 16,
+                attendedClasses: 15,
+                records: [
+                    { date: 'Nov 7, 2025', time: '03:00 PM', status: 'present' },
+                    { date: 'Nov 6, 2025', time: '03:00 PM', status: 'present' },
+                    { date: 'Nov 5, 2025', time: '03:00 PM', status: 'present' },
+                    { date: 'Nov 4, 2025', time: '03:00 PM', status: 'absent' },
+                    { date: 'Nov 1, 2025', time: '03:00 PM', status: 'present' },
+                    { date: 'Oct 31, 2025', time: '03:00 PM', status: 'present' }
+                ]
+            }
+        ];
+
+        // Function to update subjects from backend data
+        function updateSubjectsFromBackend(studentData) {
+            // Update PPS
+            const ppsSubject = subjects.find(s => s.name === 'PPS');
+            if (ppsSubject && studentData.ppsTotal) {
+                ppsSubject.attendance = studentData.ppsPercentage;
+                ppsSubject.totalClasses = studentData.ppsTotal;
+                ppsSubject.attendedClasses = studentData.ppsAttended;
+            }
+
+            // Update Mathematics
+            const mathsSubject = subjects.find(s => s.name === 'Mathematics');
+            if (mathsSubject && studentData.mathsTotal) {
+                mathsSubject.attendance = studentData.mathsPercentage;
+                mathsSubject.totalClasses = studentData.mathsTotal;
+                mathsSubject.attendedClasses = studentData.mathsAttended;
+            }
+
+            // Update Physics
+            const physicsSubject = subjects.find(s => s.name === 'Physics');
+            if (physicsSubject && studentData.physicsTotal) {
+                physicsSubject.attendance = studentData.physicsPercentage;
+                physicsSubject.totalClasses = studentData.physicsTotal;
+                physicsSubject.attendedClasses = studentData.physicsAttended;
+            }
+
+            // Re-render subject cards
+            renderSubjectCards();
+        }
+
+        // Generate Subject Cards
+        const subjectsContainer = document.getElementById('subjects-container');
+        
+        function renderSubjectCards() {
+            subjectsContainer.innerHTML = '';
+            subjects.forEach((subject, index) => {
+            const card = document.createElement('div');
+            card.className = 'subject-card';
+            card.dataset.index = index;
+            
+            let attendanceClass = 'good';
+            let attendanceBadge = 'badge-success';
+            if (subject.attendance < 75) {
+                attendanceClass = 'poor';
+                attendanceBadge = 'badge-danger';
+            } else if (subject.attendance < 85) {
+                attendanceClass = 'warning';
+                attendanceBadge = 'badge-warning';
+            }
+
+            let barColor = '#3FB950';
+            if (subject.attendance < 75) barColor = '#F85149';
+            else if (subject.attendance < 85) barColor = '#D29922';
+
+            // Generate attendance records HTML
+            let recordsHTML = '';
+            subject.records.forEach(record => {
+                recordsHTML += `
+                    <div class="attendance-entry">
+                        <div class="entry-date">${record.date}</div>
+                        <div class="entry-time">${record.time}</div>
+                        <div class="entry-status ${record.status}">${record.status === 'present' ? 'Present' : 'Absent'}</div>
+                    </div>
+                `;
+            });
+
+            card.innerHTML = `
+                <div class="subject-header">
+                    <div class="subject-info">
+                        <h3>${subject.name}</h3>
+                        <div class="subject-details">
+                            <span>${subject.code}</span>
+                            <span class="badge ${attendanceBadge}">${subject.attendedClasses}/${subject.totalClasses} Classes</span>
+                        </div>
+                        <div class="attendance-bar-container">
+                            <div class="attendance-bar-fill" style="width: ${subject.attendance}%; background-color: ${barColor};"></div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <div class="subject-stat">
+                            <div class="stat-label">Attendance</div>
+                            <div class="stat-value ${attendanceClass}">${subject.attendance}%</div>
+                        </div>
+                        <div class="expand-icon">▼</div>
+                    </div>
+                </div>
+                <div class="attendance-details">
+                    <div class="attendance-list">
+                        ${recordsHTML}
+                    </div>
+                </div>
+            `;
+            
+            // Add click handler to expand/collapse
+            card.addEventListener('click', function() {
+                this.classList.toggle('expanded');
+            });
+            
+            subjectsContainer.appendChild(card);
+            });
+        }
+
+        // Initialize page with logged-in student data
+        async function initializePage() {
+            // Get logged-in user info
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            
+            // Check if user is logged in
+            if (!user.studentId) {
+                alert('Please login first');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Update header with student info
+            document.getElementById('student-name-display').textContent = user.name || 'Student';
+            
+            // Fetch full student data to get department
+            const studentData = await fetchStudentData();
+            if (studentData) {
+                const department = studentData.department || 'N/A';
+                document.getElementById('student-id-display').textContent = `${user.studentId || 'N/A'} | ${department} Section`;
+                
+                // Update subjects with backend data
+                updateSubjectsFromBackend(studentData);
+                console.log('✅ Student data loaded for:', user.name);
+            } else {
+                document.getElementById('student-id-display').textContent = `${user.studentId || 'N/A'} | Student`;
+            }
+
+            // Initial render
+            renderSubjectCards();
+
+            // Initialize club work toggle state for this student
+            try {
+                const clubOptOut = JSON.parse(localStorage.getItem('clubWorkOptOut') || '{}');
+                const keyName = (user.name || user.username || '').toLowerCase();
+                const allow = !clubOptOut[keyName];
+                const toggle = document.getElementById('club-allow-toggle');
+                const label = document.getElementById('club-allow-label');
+                toggle.checked = allow;
+                label.textContent = `Club Work: ${allow ? 'On' : 'Off'}`;
+                toggle.addEventListener('change', function() {
+                    const updated = JSON.parse(localStorage.getItem('clubWorkOptOut') || '{}');
+                    if (!this.checked) { updated[keyName] = true; }
+                    else { delete updated[keyName]; }
+                    localStorage.setItem('clubWorkOptOut', JSON.stringify(updated));
+                    label.textContent = `Club Work: ${this.checked ? 'On' : 'Off'}`;
+                });
+            } catch(e) { console.warn('Club toggle init failed', e); }
+        }
+
+        // Initialize on page load
+        initializePage();
+
+        // Attendance Pie Chart
+        const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
+        const attendanceChart = new Chart(attendanceCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Present', 'Absent'],
+                datasets: [{
+                    data: [87, 5],
+                    backgroundColor: [
+                        'rgba(63, 185, 80, 0.8)',
+                        'rgba(248, 81, 73, 0.8)'
+                    ],
+                    borderColor: [
+                        '#3FB950',
+                        '#F85149'
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#C9D1D9',
+                            padding: 15,
+                            font: {
+                                size: 13
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const total = 92;
+                                const value = context.parsed;
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return `${context.label}: ${value} classes (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // --- AI Chatbot Logic ---
+        const chatToggle = document.getElementById('chat-toggle');
+        const chatWindow = document.getElementById('chat-window');
+        const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('send-btn');
+
+        chatToggle.addEventListener('click', () => {
+            chatWindow.classList.toggle('open');
+            chatToggle.classList.toggle('open');
+        });
+
+        function handleSendMessage() {
+            const messageText = chatInput.value.trim();
+            if (messageText === '') return;
+
+            // Add user message to UI
+            addMessage(messageText, 'user');
+            chatInput.value = '';
+
+            // Get bot response
+            setTimeout(() => {
+                const botResponse = getBotResponse(messageText);
+                addMessage(botResponse, 'bot');
+            }, 500);
+        }
+
+        sendBtn.addEventListener('click', handleSendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleSendMessage();
+            }
+        });
+
+        function addMessage(text, type) {
+            const messageElement = document.createElement('div');
+            messageElement.className = `message ${type}`;
+            messageElement.textContent = text;
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function getBotResponse(userInput) {
+            const lowerInput = userInput.toLowerCase();
+
+            // Rule-based NLP simulation
+            if (lowerInput.includes('attendance')) {
+                if (lowerInput.includes('overall')) {
+                    const overall = document.querySelector('.summary-card .card-value').textContent;
+                    return `Your overall attendance is ${overall}.`;
+                }
+                for (const subject of subjects) {
+                    if (lowerInput.includes(subject.name.toLowerCase())) {
+                        return `Your attendance in ${subject.name} is ${subject.attendance}%.`;
+                    }
+                }
+                return "Which subject's attendance are you asking about? For example: 'What is my attendance in PPS?'";
+            }
+
+            if (lowerInput.includes('schedule') || lowerInput.includes('class') || lowerInput.includes('today')) {
+                const scheduleItems = document.querySelectorAll('.schedule-item');
+                let response = "Here is your schedule for today:\n";
+                scheduleItems.forEach(item => {
+                    const time = item.querySelector('.schedule-time').textContent;
+                    const subject = item.querySelector('.schedule-subject').textContent;
+                    response += `- ${subject} from ${time}\n`;
+                });
+                return response;
+            }
+
+            if (lowerInput.includes('leave')) {
+                return "To apply for leave, please use the 'Submit Leave Application' form on this page. You'll need to provide the leave type, dates, a reason, and upload a supporting PDF document.";
+            }
+            
+            if (lowerInput.includes('hello') || lowerInput.includes('hi')) {
+                return "Hello! How can I assist you with your academic information today?";
+            }
+
+            return "I'm sorry, I can only answer questions about attendance, today's schedule, and leave applications. Please try rephrasing your question.";
+        }
+    </script>
+    <script>
+        (function() {
+            const storageKey = 'acs-theme';
+            const root = document.documentElement;
+            function applyTheme(mode) {
+                if (mode === 'light') { root.classList.add('theme-light'); root.classList.remove('theme-dark'); }
+                else if (mode === 'dark') { root.classList.add('theme-dark'); root.classList.remove('theme-light'); }
+                else { root.classList.remove('theme-light'); root.classList.remove('theme-dark'); }
+            }
+            const saved = localStorage.getItem(storageKey);
+            if (saved === 'light' || saved === 'dark') applyTheme(saved); else {
+                const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+                applyTheme(prefersLight ? 'light' : 'dark');
+            }
+            const btn = document.getElementById('themeToggle');
+            btn && btn.addEventListener('click', function(){
+                const isLight = root.classList.contains('theme-light');
+                const next = isLight ? 'dark' : 'light';
+                applyTheme(next);
+                try { localStorage.setItem(storageKey, next); } catch(e){}
+            });
+        })();
+    </script>
+</body>
+</html>

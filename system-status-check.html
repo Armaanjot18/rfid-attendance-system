@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Status Check</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #0d1117;
+            color: #c9d1d9;
+        }
+        .status-box {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .success { color: #3fb950; }
+        .error { color: #f85149; }
+        .warning { color: #d29922; }
+        button {
+            background: #238636;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #2ea043;
+        }
+        pre {
+            background: #0d1117;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 System Status Check</h1>
+    
+    <div class="status-box">
+        <h2>Server Status</h2>
+        <div id="server-status">Checking...</div>
+        <button onclick="checkServer()">Recheck Server</button>
+    </div>
+
+    <div class="status-box">
+        <h2>API Endpoints</h2>
+        <div id="api-status">Checking...</div>
+        <button onclick="checkEndpoints()">Check All Endpoints</button>
+    </div>
+
+    <div class="status-box">
+        <h2>Test Leave Submission</h2>
+        <div id="leave-test">
+            <p>This will simulate a leave request submission.</p>
+            <button onclick="testLeaveSubmission()">Test Leave Request</button>
+        </div>
+        <div id="leave-result"></div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+
+        async function checkServer() {
+            const statusDiv = document.getElementById('server-status');
+            statusDiv.innerHTML = 'Checking...';
+            
+            try {
+                const response = await fetch('http://localhost:3000/');
+                const data = await response.json();
+                
+                statusDiv.innerHTML = `
+                    <span class="success">✓ Server is running!</span>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                statusDiv.innerHTML = `
+                    <span class="error">✗ Server is not responding</span>
+                    <p>Error: ${error.message}</p>
+                    <p class="warning">Make sure to run: cd rfid_backend && node server.js</p>
+                `;
+            }
+        }
+
+        async function checkEndpoints() {
+            const statusDiv = document.getElementById('api-status');
+            statusDiv.innerHTML = 'Checking endpoints...';
+            
+            const endpoints = [
+                { name: 'All Leave Requests', url: `${API_URL}/attendance/leave-requests` },
+                { name: 'Student Leave Requests', url: `${API_URL}/attendance/leave-requests/STU-8814` },
+                { name: 'Attendance Records', url: `${API_URL}/attendance` }
+            ];
+            
+            let html = '';
+            for (const endpoint of endpoints) {
+                try {
+                    const response = await fetch(endpoint.url);
+                    const data = await response.json();
+                    html += `<p><span class="success">✓</span> ${endpoint.name}: ${data.count || 0} records</p>`;
+                } catch (error) {
+                    html += `<p><span class="error">✗</span> ${endpoint.name}: Error - ${error.message}</p>`;
+                }
+            }
+            
+            statusDiv.innerHTML = html;
+        }
+
+        async function testLeaveSubmission() {
+            const resultDiv = document.getElementById('leave-result');
+            resultDiv.innerHTML = 'Submitting test leave request...';
+            
+            const testData = {
+                studentId: 'STU-8814',
+                studentName: 'Test Student',
+                startDate: '2025-11-12',
+                endDate: '2025-11-13',
+                reason: 'Test leave request from system check',
+                type: 'duty',
+                documentData: 'data:text/plain;base64,VGVzdCBkb2N1bWVudA==',
+                documentName: 'test-document.txt'
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/attendance/leave`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    resultDiv.innerHTML = `
+                        <span class="success">✓ Leave request submitted successfully!</span>
+                        <pre>${JSON.stringify(result.data, null, 2)}</pre>
+                        <p class="warning">Check teacher portal to see this request.</p>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<span class="error">✗ Failed: ${result.message}</span>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">✗ Error: ${error.message}</span>`;
+            }
+        }
+
+        // Auto-check on load
+        window.onload = () => {
+            checkServer();
+            checkEndpoints();
+        };
+    </script>
+</body>
+</html>

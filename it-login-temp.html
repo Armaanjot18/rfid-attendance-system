@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Applied Science RFID Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0D1117;
+            --card-color: #161B22;
+            --border-color: #30363D;
+            --text-primary: #C9D1D9;
+            --text-secondary: #8B949E;
+            --accent-color: #58A6FF;
+            --accent-hover: #79B8FF;
+            --student-accent: #3FB950;
+            --teacher-accent: #F78166;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .login-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .login-panel {
+            background-color: var(--card-color);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .login-panel:hover {
+            transform: translateY(-4px);
+        }
+
+        .student-panel {
+            border-top: 3px solid var(--student-accent);
+        }
+
+        .student-panel:hover {
+            box-shadow: 0 8px 24px rgba(63, 185, 80, 0.15);
+        }
+
+        .teacher-panel {
+            border-top: 3px solid var(--teacher-accent);
+        }
+
+        .teacher-panel:hover {
+            box-shadow: 0 8px 24px rgba(247, 129, 102, 0.15);
+        }
+
+        .panel-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .panel-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .panel-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .student-panel .panel-title {
+            color: var(--student-accent);
+        }
+
+        .teacher-panel .panel-title {
+            color: var(--teacher-accent);
+        }
+
+        .panel-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .input-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .input-field {
+            padding: 0.875rem 1rem;
+            background-color: #0D1117;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+        }
+
+        .student-panel .input-field:focus {
+            border-color: var(--student-accent);
+            box-shadow: 0 0 0 3px rgba(63, 185, 80, 0.1);
+        }
+
+        .teacher-panel .input-field:focus {
+            border-color: var(--teacher-accent);
+            box-shadow: 0 0 0 3px rgba(247, 129, 102, 0.1);
+        }
+
+        .submit-btn {
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 0.5rem;
+        }
+
+        .student-panel .submit-btn {
+            background-color: var(--student-accent);
+            color: #0D1117;
+        }
+
+        .student-panel .submit-btn:hover {
+            background-color: #4FC862;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(63, 185, 80, 0.3);
+        }
+
+        .teacher-panel .submit-btn {
+            background-color: var(--teacher-accent);
+            color: #ffffff;
+        }
+
+        .teacher-panel .submit-btn:hover {
+            background-color: #FF9178;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(247, 129, 102, 0.3);
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .back-link a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .back-link a:hover {
+            color: var(--accent-hover);
+        }
+
+        .error-message {
+            color: #F85149;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        @media (max-width: 900px) {
+            .login-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Applied Science Department</h1>
+            <p>RFID Access Control System</p>
+        </header>
+
+        <div class="login-grid">
+            <!-- Student Login Panel -->
+            <div class="login-panel student-panel">
+                <div class="panel-header">
+                    <div class="panel-icon">🎓</div>
+                    <h2 class="panel-title">Student Login</h2>
+                    <p class="panel-subtitle">Access your student portal</p>
+                </div>
+                <form class="login-form" id="student-form">
+                    <div class="input-group">
+                        <label class="input-label" for="student-id">Student ID</label>
+                        <input type="text" id="student-id" class="input-field" placeholder="Enter your student ID" required>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label" for="student-rfid">RFID Number</label>
+                        <input type="text" id="student-rfid" class="input-field" placeholder="Scan or enter RFID" required>
+                    </div>
+                    <button type="submit" class="submit-btn">Student Login</button>
+                    <div class="error-message" id="student-error">Invalid credentials</div>
+                </form>
+            </div>
+
+            <!-- Teacher Login Panel -->
+            <div class="login-panel teacher-panel">
+                <div class="panel-header">
+                    <div class="panel-icon">👨‍🏫</div>
+                    <h2 class="panel-title">Teacher Login</h2>
+                    <p class="panel-subtitle">Access dashboard & analytics</p>
+                </div>
+                <form class="login-form" id="teacher-form">
+                    <div class="input-group">
+                        <label class="input-label" for="teacher-id">Teacher ID</label>
+                        <input type="text" id="teacher-id" class="input-field" placeholder="Enter your teacher ID" required>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label" for="teacher-rfid">RFID Number</label>
+                        <input type="text" id="teacher-rfid" class="input-field" placeholder="Scan or enter RFID" required>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label" for="teacher-password">Password</label>
+                        <input type="password" id="teacher-password" class="input-field" placeholder="Enter password" required>
+                    </div>
+                    <button type="submit" class="submit-btn">Teacher Login</button>
+                    <div class="error-message" id="teacher-error">Invalid credentials</div>
+                </form>
+            </div>
+        </div>
+
+        <div class="back-link">
+            <a href="index.html">← Back to Main Portal</a>
+        </div>
+    </div>
+
+    <script>
+        // Student login handler
+        document.getElementById('student-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const studentId = document.getElementById('student-id').value;
+            const studentRfid = document.getElementById('student-rfid').value;
+            
+            // Basic validation - customize as needed
+            if (studentId && studentRfid) {
+                alert('Student login successful! (Feature in development)');
+            } else {
+                document.getElementById('student-error').style.display = 'block';
+            }
+        });
+
+        // Teacher login handler
+        document.getElementById('teacher-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const teacherId = document.getElementById('teacher-id').value;
+            const teacherRfid = document.getElementById('teacher-rfid').value;
+            const teacherPassword = document.getElementById('teacher-password').value;
+            
+            // Check credentials
+            if (teacherId === 'science-user' && teacherRfid === '12345' && teacherPassword === 'password') {
+                window.location.href = 'teacher-data-access.html';
+            } else {
+                document.getElementById('teacher-error').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('teacher-error').style.display = 'none';
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>
+        :root {
+            color-scheme: dark;
+            --bg-top: #1b1437;
+            --bg-mid: #291c55;
+            --bg-bottom: #05040f;
+            --panel-bg: rgba(12, 14, 34, 0.82);
+            --panel-border: rgba(160, 123, 255, 0.4);
+            --text-primary: #f2f3ff;
+            --text-secondary: #a9acd5;
+            --accent: #b26dff;
+            --accent-strong: #d38dff;
+            --input-bg: rgba(16, 19, 45, 0.9);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: radial-gradient(circle at top, var(--bg-top) 0%, var(--bg-mid) 45%, var(--bg-bottom) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 32px 20px;
+            overflow: hidden;
+        }
+
+        .star-field {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+        }
+
+        .star-layer {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background-image: radial-gradient(2px 2px at 20px 20px, rgba(255, 255, 255, 0.8) 0, rgba(255, 255, 255, 0) 55%);
+            background-size: 140px 140px;
+            opacity: 0.32;
+            animation: drift 110s linear infinite;
+        }
+
+        .star-layer.layer-2 {
+            animation-duration: 160s;
+            opacity: 0.45;
+            transform: scale(1.25);
+        }
+
+        .star-layer.layer-3 {
+            animation-duration: 220s;
+            opacity: 0.18;
+            transform: scale(1.5);
+        }
+
+        @keyframes drift {
+            from {
+                transform: translate3d(0, 0, 0) scale(1);
+            }
+            to {
+                transform: translate3d(-40%, -40%, 0) scale(1);
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 460px;
+            width: 100%;
+            border-radius: 22px;
+            padding: 18px;
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            border-radius: 22px;
+            border: 1px solid rgba(210, 168, 255, 0.25);
+            box-shadow: 0 35px 70px rgba(5, 5, 18, 0.85);
+            overflow: hidden;
+            backdrop-filter: blur(24px);
+            position: relative;
+        }
+
+        .panel::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: linear-gradient(145deg, rgba(178, 109, 255, 0.18), rgba(70, 90, 255, 0.12));
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+
+        .container:hover .panel::after {
+            opacity: 1;
+        }
+
+        .header {
+            padding: 42px 32px 28px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header::after {
+            content: "";
+            position: absolute;
+            inset: 0 12%;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(208, 165, 255, 0.28), transparent 70%);
+            filter: blur(12px);
+            z-index: 0;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            letter-spacing: 0.05em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 0.98em;
+            color: var(--text-secondary);
+            margin-top: 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .content {
+            padding: 0 32px 36px;
+            position: relative;
+        }
+
+        .content h2 {
+            font-size: 1.2em;
+            color: var(--text-primary);
+            text-align: center;
+            letter-spacing: 0.04em;
+            margin-bottom: 26px;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .input-group {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .field-label {
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--text-secondary);
+        }
+
+        .input-group.is-active .field-label {
+            color: var(--accent-strong);
+        }
+
+        .field-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            border: 1px solid rgba(200, 175, 255, 0.2);
+            border-radius: 14px;
+            font-size: 0.98em;
+            transition: border 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+        }
+
+        .field-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 35px rgba(178, 109, 255, 0.35);
+            transform: translateY(-2px);
+        }
+
+        .input-glow {
+            position: absolute;
+            inset: -2px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(178, 109, 255, 0.22), rgba(90, 108, 255, 0.16));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .input-group:focus-within .input-glow {
+            opacity: 1;
+        }
+
+        .btn-primary {
+            position: relative;
+            margin-top: 8px;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+            color: var(--text-primary);
+            border: none;
+            border-radius: 999px;
+            font-size: 1em;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 15px 40px rgba(178, 109, 255, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 22px 55px rgba(178, 109, 255, 0.5);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0) scale(0.99);
+        }
+
+        .btn-primary .wave {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            animation: ripple 0.6s ease-out;
+        }
+
+        @keyframes ripple {
+            from {
+                opacity: 0.6;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(18);
+            }
+        }
+
+        .status-banner {
+            margin-top: 18px;
+            padding: 14px 18px;
+            border-radius: 14px;
+            background: rgba(178, 109, 255, 0.12);
+            border: 1px solid rgba(178, 109, 255, 0.25);
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .status-banner.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .form-footer {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 0.88em;
+            color: var(--text-secondary);
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 14px;
+            color: var(--accent-strong);
+            text-decoration: none;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            transition: color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: #f0d6ff;
+        }
+
+        @media (max-width: 520px) {
+            .content {
+                padding: 0 24px 32px;
+            }
+
+            .header {
+                padding: 38px 24px 26px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="star-field" aria-hidden="true">
+        <div class="star-layer layer-1"></div>
+        <div class="star-layer layer-2"></div>
+        <div class="star-layer layer-3"></div>
+    </div>
+
+    <div class="container">
+        <div class="panel">
+            <div class="header">
+                <h1>Applied Science Command Login</h1>
+                <p>Secure access channel for Applied Science faculty, researchers, and cadets</p>
+            </div>
+            <div class="content">
+                <h2>Authenticate to enter the orbital laboratory</h2>
+                <form class="login-form" novalidate>
+                    <div class="input-group">
+                        <span class="input-glow"></span>
+                        <label class="field-label" for="studentId">Student / Staff ID</label>
+                        <input class="field-input" type="text" id="studentId" name="studentId" placeholder="Scan or enter institutional ID" required>
+                    </div>
+                    <div class="input-group">
+                        <span class="input-glow"></span>
+                        <label class="field-label" for="rfid">RFID Card Number</label>
+                        <input class="field-input" type="text" id="rfid" name="rfid" placeholder="RFID tag identifier" required>
+                    </div>
+                    <div class="input-group">
+                        <span class="input-glow"></span>
+                        <label class="field-label" for="passcode">Security Passcode</label>
+                        <input class="field-input" type="password" id="passcode" name="passcode" placeholder="Mission passcode" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Initiate Login</button>
+                </form>
+                <div class="status-banner" role="status" aria-live="polite"></div>
+                <div class="form-footer">
+                    Need assistance? Contact Applied Science control.
+                    <br>
+                    <a class="back-link" href="index.html">Back to Department Selection</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.querySelector('.login-form');
+        const statusBanner = document.querySelector('.status-banner');
+        const inputs = document.querySelectorAll('.field-input');
+        const studentIdInput = document.getElementById('studentId');
+        const rfidInput = document.getElementById('rfid');
+        const passcodeIn = document.getElementById('passcode');
+
+        // --- Mock Backend Credentials ---
+        const VALID_STUDENT_ID = "science-user";
+        const VALID_RFID = "12345";
+        const VALID_PASSCODE = "password";
+        // -----------------------------
+
+        function createWave(event, element) {
+            const wave = document.createElement('span');
+            wave.className = 'wave';
+            const rect = element.getBoundingClientRect();
+            const pointerX = typeof event.clientX === 'number' && event.clientX > 0 ? event.clientX : rect.left + rect.width / 2;
+            const pointerY = typeof event.clientY === 'number' && event.clientY > 0 ? event.clientY : rect.top + rect.height / 2;
+            wave.style.left = `${pointerX - rect.left}px`;
+            wave.style.top = `${pointerY - rect.top}px`;
+            element.appendChild(wave);
+            setTimeout(() => wave.remove(), 600);
+        }
+
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            
+            const enteredStudentId = studentIdInput.value.trim();
+            const enteredRfid = rfidInput.value.trim();
+            const enteredPasscode = passcodeIn.value.trim();
+
+            statusBanner.textContent = 'Establishing secure channel...';
+            statusBanner.classList.add('is-visible');
+            statusBanner.style.background = 'rgba(178, 109, 255, 0.12)'; // Reset color
+            statusBanner.style.borderColor = 'rgba(178, 109, 255, 0.25)'; // Reset color
+
+            setTimeout(() => {
+                if (enteredStudentId === VALID_STUDENT_ID && enteredRfid === VALID_RFID && enteredPasscode === VALID_PASSCODE) {
+                    statusBanner.textContent = 'Success! Redirecting to data panel...';
+                    setTimeout(() => {
+                        window.location.href = 'teacher-data-access.html';
+                    }, 1500);
+                } else {
+                    statusBanner.textContent = 'Access Denied. Invalid credentials.';
+                    statusBanner.style.background = 'rgba(255, 109, 109, 0.12)'; // Error color
+                    statusBanner.style.borderColor = 'rgba(255, 109, 109, 0.25)'; // Error color
+                }
+            }, 1000);
+
+            setTimeout(() => {
+                statusBanner.classList.remove('is-visible');
+            }, 5000);
+        });
+
+        inputs.forEach((input) => {
+            input.addEventListener('focus', () => {
+                input.parentElement.classList.add('is-active');
+            });
+
+            input.addEventListener('blur', () => {
+                input.parentElement.classList.remove('is-active');
+            });
+        });
+
+        document.querySelector('.btn-primary').addEventListener('click', (event) => {
+            createWave(event, event.currentTarget);
+        });
+    </script>
+</body>
+</html>

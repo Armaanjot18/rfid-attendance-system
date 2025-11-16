@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Integration Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #0D1117;
+            color: #C9D1D9;
+        }
+        .section {
+            background: #161B22;
+            border: 1px solid #30363D;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        button {
+            background: #58A6FF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #79B8FF;
+        }
+        .download-btn {
+            background: #3FB950;
+        }
+        .download-btn:hover {
+            background: #4FC862;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #30363D;
+        }
+        th {
+            background: #0D1117;
+            color: #8B949E;
+            text-transform: uppercase;
+            font-size: 0.85em;
+        }
+        .success { color: #3FB950; }
+        .error { color: #F85149; }
+        h2 { color: #58A6FF; }
+        input {
+            background: #0D1117;
+            border: 1px solid #30363D;
+            color: #C9D1D9;
+            padding: 8px;
+            border-radius: 4px;
+            margin: 5px;
+        }
+        .form-group {
+            margin: 10px 0;
+        }
+        label {
+            display: inline-block;
+            width: 150px;
+        }
+    </style>
+</head>
+<body>
+    <h1>📊 Excel Integration - Student Management</h1>
+    
+    <div class="section">
+        <h2>Excel File Operations</h2>
+        <p>All student data is stored in Excel file: <code>rfid_backend/data/students.xlsx</code></p>
+        <button class="download-btn" onclick="downloadExcel()">📥 Download Excel File</button>
+        <button onclick="loadStudents()">🔄 Reload from Excel</button>
+        <div id="status" style="margin-top: 10px;"></div>
+    </div>
+
+    <div class="section">
+        <h2>Add New Student</h2>
+        <div class="form-group">
+            <label>Student Name:</label>
+            <input type="text" id="new-name" placeholder="e.g., John Doe">
+        </div>
+        <div class="form-group">
+            <label>Student ID:</label>
+            <input type="text" id="new-id" placeholder="e.g., STU-1001">
+        </div>
+        <div class="form-group">
+            <label>Department:</label>
+            <input type="text" id="new-dept" placeholder="e.g., CSE">
+        </div>
+        <button onclick="addStudent()">➕ Add Student to Excel</button>
+        <div id="add-result" style="margin-top: 10px;"></div>
+    </div>
+
+    <div class="section">
+        <h2>Students from Excel</h2>
+        <div id="student-count"></div>
+        <table id="student-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>ID</th>
+                    <th>Department</th>
+                    <th>Attendance</th>
+                    <th>Total Classes</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="student-tbody">
+                <tr><td colspan="6" style="text-align: center;">Loading...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+
+        async function loadStudents() {
+            const statusDiv = document.getElementById('status');
+            const tbody = document.getElementById('student-tbody');
+            const countDiv = document.getElementById('student-count');
+            
+            statusDiv.innerHTML = '<span>Loading from Excel...</span>';
+            
+            try {
+                const response = await fetch(`${API_URL}/students`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    statusDiv.innerHTML = `<span class="success">✓ Loaded ${data.count} students from Excel</span>`;
+                    countDiv.innerHTML = `<strong>${data.count}</strong> students found in Excel`;
+                    
+                    tbody.innerHTML = '';
+                    data.data.forEach(student => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${student.name}</td>
+                            <td>${student.id}</td>
+                            <td>${student.department}</td>
+                            <td>${student.attendance}%</td>
+                            <td>${student.totalClasses}</td>
+                            <td>
+                                <button onclick="deleteStudent('${student.id}')" style="background: #F85149; padding: 5px 10px;">Delete</button>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                } else {
+                    statusDiv.innerHTML = `<span class="error">✗ Failed to load: ${data.message}</span>`;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<span class="error">✗ Error: ${error.message}</span>`;
+            }
+        }
+
+        async function downloadExcel() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = '<span>Downloading Excel file...</span>';
+            
+            try {
+                window.location.href = `${API_URL}/students/export/excel`;
+                statusDiv.innerHTML = '<span class="success">✓ Excel file download started</span>';
+            } catch (error) {
+                statusDiv.innerHTML = `<span class="error">✗ Error: ${error.message}</span>`;
+            }
+        }
+
+        async function addStudent() {
+            const name = document.getElementById('new-name').value;
+            const id = document.getElementById('new-id').value;
+            const department = document.getElementById('new-dept').value;
+            const resultDiv = document.getElementById('add-result');
+            
+            if (!name || !id || !department) {
+                resultDiv.innerHTML = '<span class="error">Please fill all fields</span>';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/students`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, id, department })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = '<span class="success">✓ Student added to Excel!</span>';
+                    document.getElementById('new-name').value = '';
+                    document.getElementById('new-id').value = '';
+                    document.getElementById('new-dept').value = '';
+                    loadStudents();
+                } else {
+                    resultDiv.innerHTML = `<span class="error">✗ ${data.message}</span>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">✗ Error: ${error.message}</span>`;
+            }
+        }
+
+        async function deleteStudent(studentId) {
+            if (!confirm(`Delete student ${studentId}?`)) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/students/${studentId}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Student deleted from Excel!');
+                    loadStudents();
+                } else {
+                    alert(`Error: ${data.message}`);
+                }
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+
+        // Load students on page load
+        loadStudents();
+    </script>
+</body>
+</html>

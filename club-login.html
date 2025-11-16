@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club Login Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d0f12;
+            --gradient-1: #2d150c;
+            --gradient-2: #6d441f;
+            --gradient-3: #3a1c10;
+            --gradient-4: #1e2540;
+            --gradient-5: #0b3a3f;
+            --gradient-6: #3d1f39;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-hover: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --glass-border-hover: rgba(255, 255, 255, 0.35);
+            --text-primary: #e9e9e9;
+            --text-secondary: #b7b7b7;
+            --accent-color: #e3c29c;
+            --accent-hover: #f4d9b3;
+            --accent-gradient: linear-gradient(135deg,#ff7d5e 5%,#e3c29c 45%,#6ec6ff 75%,#c792ea 100%);
+            --shadow-color: rgba(227, 194, 156, 0.25);
+            --radius-lg: 16px;
+            --transition: 0.45s cubic-bezier(.4,.2,.2,1);
+        }
+
+        :root.theme-light {
+            --bg-color: #f6f7fb;
+            --gradient-1: #ffffff;
+            --gradient-2: #f4f6ff;
+            --gradient-3: #eef2ff;
+            --gradient-4: #e6f3ff;
+            --gradient-5: #eaf9f5;
+            --gradient-6: #f7ecff;
+            --glass-bg: rgba(255, 255, 255, 0.65);
+            --glass-hover: rgba(255, 255, 255, 0.8);
+            --glass-border: rgba(0, 0, 0, 0.08);
+            --glass-border-hover: rgba(0, 0, 0, 0.18);
+            --text-primary: #0f141a;
+            --text-secondary: #3d4650;
+            --accent-color: #7b5cff;
+            --accent-hover: #5c8dff;
+            --accent-gradient: linear-gradient(135deg,#ff9a7a 5%,#ffc864 40%,#5cc9ff 75%,#9c7cff 100%);
+            --shadow-color: rgba(17, 24, 39, 0.08);
+        }
+
+        @media (prefers-color-scheme: light) { :root:not(.theme-dark):not(.theme-light) { color-scheme: light; } }
+        @media (prefers-color-scheme: dark) { :root:not(.theme-dark):not(.theme-light) { color-scheme: dark; } }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+            background:
+                radial-gradient(circle at 18% 22%, var(--gradient-4) 0%, transparent 48%),
+                radial-gradient(circle at 78% 74%, var(--gradient-5) 0%, transparent 60%),
+                radial-gradient(circle at 85% 18%, var(--gradient-6) 0%, transparent 55%),
+                linear-gradient(115deg, var(--gradient-3), var(--bg-color));
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 3rem 2rem 3.5rem;
+        }
+        :root.theme-light body { background:
+            radial-gradient(circle at 18% 22%, var(--gradient-4) 0%, transparent 48%),
+            radial-gradient(circle at 78% 74%, var(--gradient-5) 0%, transparent 60%),
+            radial-gradient(circle at 85% 18%, var(--gradient-6) 0%, transparent 55%),
+            linear-gradient(115deg, var(--bg-color), #ffffff); }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .header { text-align: left; margin-bottom: 2.4rem; }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .clubs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.8rem;
+            margin-bottom: 2rem;
+        }
+
+        .club-card {
+            position: relative;
+            background: linear-gradient(145deg, var(--glass-bg) 0%, rgba(255,255,255,0.03) 100%);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            border: 1px solid transparent;
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+            overflow: hidden;
+            backdrop-filter: blur(14px) saturate(160%);
+            -webkit-backdrop-filter: blur(14px) saturate(160%);
+            box-shadow: 0 1px 0 rgba(255,255,255,0.08), 0 8px 32px -8px rgba(0,0,0,0.55);
+            transition: var(--transition);
+            text-decoration: none;
+            color: var(--text-primary);
+            display: block;
+        }
+
+        .club-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(145deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 45%);
+            opacity: 0.35;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .club-card::after {
+            content: "";
+            position: absolute;
+            inset: -1px;
+            border-radius: inherit;
+            padding: 1px;
+            background: var(--accent-gradient);
+            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask-composite: exclude;
+            -webkit-mask-composite: xor;
+            opacity: 0.55;
+            filter: blur(16px);
+            pointer-events: none;
+            transition: var(--transition);
+            z-index: 0;
+        }
+
+        .club-card:hover {
+            transform: translateY(-7px);
+            background: linear-gradient(155deg, var(--glass-hover) 0%, rgba(255,255,255,0.04) 100%);
+        }
+
+        .club-card:hover::after {
+            opacity: 0.85;
+            filter: blur(22px) brightness(1.15);
+        }
+
+        .club-icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .club-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.01em;
+        }
+
+        .club-description {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 1.2rem;
+        }
+
+        .club-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            transition: var(--transition);
+        }
+
+        .club-card:hover .club-link {
+            opacity: 0.95;
+        }
+
+        .club-link .arrow {
+            transition: transform 0.2s ease;
+        }
+
+        .club-card:hover .club-link .arrow {
+            transform: translateX(5px);
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .back-link a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            cursor: pointer;
+            backdrop-filter: blur(10px) saturate(140%);
+            -webkit-backdrop-filter: blur(10px) saturate(140%);
+            box-shadow: 0 8px 24px -10px var(--shadow-color);
+            transition: var(--transition);
+            user-select: none;
+        }
+        .theme-toggle:hover {
+            border-color: var(--glass-border-hover);
+            transform: translateY(-1px);
+        }
+        .theme-toggle svg { width: 18px; height: 18px; }
+        .icon-sun { display: none; }
+        .icon-moon { display: inline; }
+        :root.theme-light .icon-sun { display: inline; }
+        :root.theme-light .icon-moon { display: none; }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,1px,1px); white-space: nowrap; border: 0; }
+
+        /* Back to Home button */
+        .home-link { position: fixed; top: 16px; left: 16px; display: inline-flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 999px; border: 1px solid var(--glass-border); background: var(--glass-bg); color: var(--text-primary); text-decoration: none; cursor: pointer; backdrop-filter: blur(10px) saturate(140%); -webkit-backdrop-filter: blur(10px) saturate(140%); box-shadow: 0 8px 24px -10px var(--shadow-color); transition: var(--transition); user-select: none; z-index: 1000; }
+        .home-link:hover { border-color: var(--glass-border-hover); transform: translateY(-1px); }
+        .home-link svg { width: 18px; height: 18px; }
+
+        @media (max-width: 900px) {
+            .clubs-grid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; }
+        }
+
+        @media (max-width: 600px) {
+            .clubs-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="home-link" aria-label="Back to Home">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 12l9-8 9 8"/>
+                <path d="M9 21V9h6v12"/>
+            </svg>
+            <span>Home</span>
+        </a>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme">
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="4"></circle>
+                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+            </svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+            <span class="sr-only">Theme</span>
+        </button>
+
+        <header class="header">
+            <h1>Student Clubs & Societies</h1>
+            <p>Select your club to access member login and activity spaces</p>
+        </header>
+
+        <div class="clubs-grid">
+            <a href="#" class="club-card" data-club="robotics">
+                <div class="club-icon">🤖</div>
+                <h2 class="club-name">Robotics Club</h2>
+                <p class="club-description">Access robotics lab, competition workspace, and project storage.</p>
+                <div class="club-link">
+                    <span>Member Login</span>
+                    <span class="arrow">→</span>
+                </div>
+            </a>
+
+            <a href="#" class="club-card" data-club="coding">
+                <div class="club-icon">💻</div>
+                <h2 class="club-name">Coding Club</h2>
+                <p class="club-description">Enter hackathon rooms, development labs, and team spaces.</p>
+                <div class="club-link">
+                    <span>Member Login</span>
+                    <span class="arrow">→</span>
+                </div>
+            </a>
+
+            <a href="#" class="club-card" data-club="photography">
+                <div class="club-icon">📷</div>
+                <h2 class="club-name">Photography Club</h2>
+                <p class="club-description">Access dark rooms, studio spaces, and equipment storage.</p>
+                <div class="club-link">
+                    <span>Member Login</span>
+                    <span class="arrow">→</span>
+                </div>
+            </a>
+
+            <a href="#" class="club-card" data-club="music">
+                <div class="club-icon">🎵</div>
+                <h2 class="club-name">Music Club</h2>
+                <p class="club-description">Enter rehearsal rooms, recording studios, and instrument storage.</p>
+                <div class="club-link">
+                    <span>Member Login</span>
+                    <span class="arrow">→</span>
+                </div>
+            </a>
+
+            <a href="#" class="club-card" data-club="drama">
+                <div class="club-icon">🎭</div>
+                <h2 class="club-name">Drama Club</h2>
+                <p class="club-description">Access theater spaces, costume rooms, and backstage areas.</p>
+                <div class="club-link">
+                    <span>Member Login</span>
+                    <span class="arrow">→</span>
+                </div>
+            </a>
+
+            <a href="#" class="club-card" data-club="sports">
+                <div class="club-icon">⚽</div>
+                <h2 class="club-name">Sports Club</h2>
+                <p class="club-description">Enter gyms, sports equipment rooms, and training facilities.</p>
+                <div class="club-link">
+                    <span>Member Login</span>
+                    <span class="arrow">→</span>
+                </div>
+            </a>
+
+            <a href="#" class="club-card" data-club="debate">
+                <div class="club-icon">🎤</div>
+                <h2 class="club-name">Debate Society</h2>
+                <p class="club-description">Access meeting rooms, preparation areas, and library sections.</p>
+                <div class="club-link">
+                    <span>Member Login</span>
+                    <span class="arrow">→</span>
+                </div>
+            </a>
+
+            <a href="#" class="club-card" data-club="art">
+                <div class="club-icon">🎨</div>
+                <h2 class="club-name">Art Club</h2>
+                <p class="club-description">Enter art studios, exhibition spaces, and supply storage.</p>
+                <div class="club-link">
+                    <span>Member Login</span>
+                    <span class="arrow">→</span>
+                </div>
+            </a>
+
+            <a href="#" class="club-card" data-club="literature">
+                <div class="club-icon">📚</div>
+                <h2 class="club-name">Literature Club</h2>
+                <p class="club-description">Access reading rooms, discussion areas, and publication offices.</p>
+                <div class="club-link">
+                    <span>Member Login</span>
+                    <span class="arrow">→</span>
+                </div>
+            </a>
+
+            <a href="#" class="club-card" data-club="science">
+                <div class="club-icon">🔬</div>
+                <h2 class="club-name">Science Club</h2>
+                <p class="club-description">Enter experiment labs, observatory, and research facilities.</p>
+                <div class="club-link">
+                    <span>Member Login</span>
+                    <span class="arrow">→</span>
+                </div>
+            </a>
+
+            <a href="#" class="club-card" data-club="entrepreneurship">
+                <div class="club-icon">💡</div>
+                <h2 class="club-name">Entrepreneurship Cell</h2>
+                <p class="club-description">Access co-working spaces, meeting rooms, and startup resources.</p>
+                <div class="club-link">
+                    <span>Member Login</span>
+                    <span class="arrow">→</span>
+                </div>
+            </a>
+
+            <a href="#" class="club-card" data-club="environment">
+                <div class="club-icon">🌱</div>
+                <h2 class="club-name">Environment Club</h2>
+                <p class="club-description">Enter sustainability labs, green spaces, and project areas.</p>
+                <div class="club-link">
+                    <span>Member Login</span>
+                    <span class="arrow">→</span>
+                </div>
+            </a>
+        </div>
+
+        <div class="back-link">
+            <a href="index.html">← Back to Main Portal</a>
+        </div>
+    </div>
+
+    <script>
+        (function(){
+          const storageKey='acs-theme';
+          const root=document.documentElement;
+          function applyTheme(m){ if(m==='light'){root.classList.add('theme-light');root.classList.remove('theme-dark');} else if(m==='dark'){root.classList.add('theme-dark');root.classList.remove('theme-light');} else {root.classList.remove('theme-light');root.classList.remove('theme-dark');}};
+          const saved=localStorage.getItem(storageKey);
+          if(saved==='light'||saved==='dark') applyTheme(saved); else { const prefers=window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches; applyTheme(prefers?'light':'dark'); }
+          const btn=document.getElementById('themeToggle');
+          btn&&btn.addEventListener('click',function(){ const isLight=root.classList.contains('theme-light'); const next=isLight?'dark':'light'; applyTheme(next); try{localStorage.setItem(storageKey,next);}catch(e){} });
+        })();
+
+        // Handle club selection
+        document.querySelectorAll('.club-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                e.preventDefault();
+                const clubName = this.getAttribute('data-club');
+                const displayName = this.querySelector('.club-name').textContent;
+                // Store selected club and redirect to login page
+                sessionStorage.setItem('selectedClub', clubName);
+                sessionStorage.setItem('selectedClubDisplay', displayName);
+                window.location.href = `club-member-login.html?club=${clubName}`;
+            });
+        });
+    </script>
+</body>
+</html>

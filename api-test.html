@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #0D1117;
+            color: #C9D1D9;
+        }
+        .test-section {
+            background: #161B22;
+            border: 1px solid #30363D;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        button {
+            background: #58A6FF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #79B8FF;
+        }
+        .result {
+            background: #0D1117;
+            border: 1px solid #30363D;
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .success { color: #3FB950; }
+        .error { color: #F85149; }
+        h2 { color: #58A6FF; }
+    </style>
+</head>
+<body>
+    <h1>Backend API Testing</h1>
+    
+    <div class="test-section">
+        <h2>1. Server Health Check</h2>
+        <button onclick="testServer()">Test Server Connection</button>
+        <div id="server-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Student Login</h2>
+        <button onclick="testStudentLogin()">Login as Student</button>
+        <div id="student-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Teacher Login</h2>
+        <button onclick="testTeacherLogin()">Login as Teacher</button>
+        <div id="teacher-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. Get Students Data</h2>
+        <button onclick="testGetStudents()">Fetch Students</button>
+        <div id="students-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>5. Record Attendance</h2>
+        <button onclick="testRecordAttendance()">Record Attendance</button>
+        <div id="attendance-result" class="result"></div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        let authToken = '';
+
+        async function testServer() {
+            const resultDiv = document.getElementById('server-result');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                const response = await fetch('http://localhost:3000/');
+                const data = await response.json();
+                resultDiv.innerHTML = `<span class="success">✓ Server is running!</span>\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">✗ Error:</span> ${error.message}\n\nMake sure the backend server is running on port 3000.`;
+            }
+        }
+
+        async function testStudentLogin() {
+            const resultDiv = document.getElementById('student-result');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: 'student-user',
+                        password: 'password',
+                        role: 'student'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    authToken = data.token;
+                    resultDiv.innerHTML = `<span class="success">✓ Login Successful!</span>\n${JSON.stringify(data, null, 2)}`;
+                } else {
+                    resultDiv.innerHTML = `<span class="error">✗ Login Failed:</span> ${data.message}`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">✗ Error:</span> ${error.message}`;
+            }
+        }
+
+        async function testTeacherLogin() {
+            const resultDiv = document.getElementById('teacher-result');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: 'science-user',
+                        password: 'password',
+                        role: 'teacher'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    authToken = data.token;
+                    resultDiv.innerHTML = `<span class="success">✓ Login Successful!</span>\n${JSON.stringify(data, null, 2)}`;
+                } else {
+                    resultDiv.innerHTML = `<span class="error">✗ Login Failed:</span> ${data.message}`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">✗ Error:</span> ${error.message}`;
+            }
+        }
+
+        async function testGetStudents() {
+            const resultDiv = document.getElementById('students-result');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                const response = await fetch(`${API_URL}/students`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `<span class="success">✓ Retrieved ${data.count} students!</span>\n${JSON.stringify(data, null, 2)}`;
+                } else {
+                    resultDiv.innerHTML = `<span class="error">✗ Failed:</span> ${data.message}`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">✗ Error:</span> ${error.message}`;
+            }
+        }
+
+        async function testRecordAttendance() {
+            const resultDiv = document.getElementById('attendance-result');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                const response = await fetch(`${API_URL}/attendance/record`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        studentId: 'STU-8814',
+                        date: new Date().toISOString().split('T')[0],
+                        status: 'present',
+                        type: 'regular'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `<span class="success">✓ Attendance Recorded!</span>\n${JSON.stringify(data, null, 2)}`;
+                } else {
+                    resultDiv.innerHTML = `<span class="error">✗ Failed:</span> ${data.message}`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">✗ Error:</span> ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
