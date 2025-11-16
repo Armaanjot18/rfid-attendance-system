@@ -994,14 +994,14 @@
 
             // Map student IDs to actual student roll numbers (STU-XXXX format)
             const studentRollMap = {
-                1: 'STU-7743', // Prabdeep Singh
-                2: 'STU-0002', // Priya Singh
-                3: 'STU-0003', // Neha Gupta
-                4: 'STU-8814', // Armaanjot Singh
-                5: 'STU-0005', // Vikram Sharma
-                6: 'STU-0006', // Rohan Singh
-                7: 'STU-7655', // Rajveer Singh
-                8: 'STU-0008'  // Aditya Verma
+                1: 'STU-7743', // Prabdeep Singh (actual student in DB)
+                2: 'STU-7743', // Priya Singh -> mapped to Prabhdeep for demo
+                3: 'STU-9999', // Neha Gupta -> mapped to Gursheen
+                4: 'STU-8814', // Armaanjot Singh (actual student in DB)
+                5: 'STU-8814', // Vikram Sharma -> mapped to Armaanjot for demo
+                6: 'STU-7655', // Rohan Singh -> mapped to Rajveer
+                7: 'STU-7655', // Rajveer Singh (actual student in DB)
+                8: 'STU-9999'  // Aditya Verma -> mapped to Gursheen for demo
             };
 
             // Assign work to all selected students via API
@@ -1214,20 +1214,16 @@
 
             if (!token) return;
 
-            // Student roll to local ID mapping
+            // Student roll to local ID mapping (actual students in DB)
             const rollToLocalId = {
-                'STU-7743': 1, // Prabdeep Singh
-                'STU-0002': 2, // Priya Singh
-                'STU-0003': 3, // Neha Gupta
-                'STU-8814': 4, // Armaanjot Singh
-                'STU-0005': 5, // Vikram Sharma
-                'STU-0006': 6, // Rohan Singh
-                'STU-7655': 7, // Rajveer Singh
-                'STU-0008': 8  // Aditya Verma
+                'STU-7743': [1, 2], // Prabdeep Singh (also shows for Priya)
+                'STU-8814': [4, 5], // Armaanjot Singh (also shows for Vikram)
+                'STU-7655': [6, 7], // Rajveer Singh (also shows for Rohan)
+                'STU-9999': [3, 8]  // Gursheen Kaur (also shows for Neha & Aditya)
             };
 
             // Load duties for each student
-            for (const [rollNumber, localId] of Object.entries(rollToLocalId)) {
+            for (const [rollNumber, localIds] of Object.entries(rollToLocalId)) {
                 try {
                     const response = await fetch(`${API_URL}/clubs/student/${rollNumber}/duties`, {
                         headers: {
@@ -1238,19 +1234,21 @@
                     const result = await response.json();
                     
                     if (result.success && Array.isArray(result.data)) {
-                        // Find the student in our teams
-                        for (const team of clubPortal.teams) {
-                            const student = team.students.find(s => s.id === localId);
-                            if (student) {
-                                student.work = result.data.map(duty => ({
-                                    id: duty.id,
-                                    title: duty.duty_title,
-                                    description: duty.duty_description,
-                                    status: duty.status,
-                                    team: duty.club_name || team.name,
-                                    assignedAt: duty.assigned_date
-                                }));
-                                break;
+                        const duties = result.data.map(duty => ({
+                            id: duty.id,
+                            title: duty.duty_title,
+                            description: duty.duty_description,
+                            status: duty.status,
+                            assignedAt: duty.assigned_date
+                        }));
+
+                        // Assign to all local IDs that map to this roll number
+                        for (const localId of localIds) {
+                            for (const team of clubPortal.teams) {
+                                const student = team.students.find(s => s.id === localId);
+                                if (student) {
+                                    student.work = [...duties]; // Clone the duties array
+                                }
                             }
                         }
                     }
