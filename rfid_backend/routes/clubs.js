@@ -144,39 +144,57 @@ router.get('/duties/:dutyId/updates', async (req, res) => {
 // Create new duty (for club portal/heads)
 router.post('/duties', async (req, res) => {
     try {
-        const { clubId, studentId, dutyTitle, dutyDescription, dueDate, priority, assignedBy } = req.body;
+        // Support both camelCase and snake_case
+        const clubId = req.body.clubId || req.body.club_id;
+        const studentId = req.body.studentId || req.body.student_id;
+        const dutyTitle = req.body.dutyTitle || req.body.duty_title;
+        const dutyDescription = req.body.dutyDescription || req.body.duty_description;
+        const dueDate = req.body.dueDate || req.body.due_date;
+        const priority = req.body.priority || 'medium';
+        const assignedBy = req.body.assignedBy || req.body.assigned_by;
+        
+        console.log('Creating duty:', { clubId, studentId, dutyTitle, dutyDescription, dueDate, priority });
         
         if (!clubId || !studentId || !dutyTitle) {
             return res.status(400).json({
                 success: false,
-                message: 'Club ID, student ID, and duty title are required'
+                message: 'Club ID, student ID, and duty title are required',
+                received: { clubId, studentId, dutyTitle }
             });
         }
         
         // Get student's database ID
-        const [students] = await db.query(
-            'SELECT id FROM students WHERE student_id = ?',
-            [studentId]
+        const result = await db.query(
+            'SELECT id FROM students WHERE student_id = ? OR roll_number = ?',
+            [studentId, studentId]
         );
+        
+        const students = Array.isArray(result[0]) ? result[0] : [result[0]];
         
         if (!students || students.length === 0) {
             return res.status(404).json({
                 success: false,
-                message: 'Student not found'
+                message: 'Student not found',
+                searchedFor: studentId
             });
         }
         
         const studentDbId = students[0].id;
         const currentDate = new Date().toISOString().split('T')[0];
         
-        await db.query(`
+        const insertResult = await db.query(`
             INSERT INTO club_duties (club_id, student_id, duty_title, duty_description, assigned_date, due_date, priority, assigned_by)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `, [clubId, studentDbId, dutyTitle, dutyDescription, currentDate, dueDate, priority || 'medium', assignedBy]);
+        `, [clubId, studentDbId, dutyTitle, dutyDescription, currentDate, dueDate, priority, assignedBy]);
         
         res.json({
             success: true,
-            message: 'Duty assigned successfully'
+            message: 'Duty assigned successfully',
+            data: {
+                id: insertResult[0]?.insertId,
+                student_id: studentId,
+                duty_title: dutyTitle
+            }
         });
     } catch (error) {
         console.error('Error creating duty:', error);
